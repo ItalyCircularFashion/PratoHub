@@ -61,6 +61,13 @@ function renderDiscussionRow(item, author){
         <div class="disc-right"><span class="replies">${replies}</span>replies</div>
       </div>`);
   }
+  
+  // Validation for full Discussion model
+  if(!item || typeof item !== 'object'){
+    console.error('Invalid discussion item:', item);
+    return el('<div class="disc-row"></div>');
+  }
+  
   // Full Discussion model — richer status badges, real author + timestamps,
   // plus data attributes the interaction service sorts/filters by.
   const badges = [
@@ -68,12 +75,14 @@ function renderDiscussionRow(item, author){
     item.acceptedAnswerId && '<span class="tag" style="color:var(--mkt-pos); border-color:var(--mkt-pos);">Solved</span>',
     item.moderationStatus === 'locked' && '<span class="tag">Locked</span>',
   ].filter(Boolean).join(' ');
-  const roleBadge = (author && FDM.components) ? FDM.components.renderRoleBadge(author) : '';
-  const user = FDM.auth.getCurrentUser();
-  const following = FDM.permissions.canFollow(user) && FDM.session.isFollowing('discussion', item.id);
-  const followBtn = FDM.components.gateOrCta('FOLLOW_DISCUSSION',
+  
+  const roleBadge = (author && FDM.components && FDM.components.renderRoleBadge) ? FDM.components.renderRoleBadge(author) : '';
+  const user = FDM.auth ? FDM.auth.getCurrentUser() : null;
+  const following = user && FDM.session && FDM.permissions && FDM.permissions.canFollow && FDM.permissions.canFollow(user) && FDM.session.isFollowing('discussion', item.id);
+  const followBtn = FDM.components && FDM.components.gateOrCta ? FDM.components.gateOrCta('FOLLOW_DISCUSSION',
     `<button class="comment-action follow-toggle" data-id="${item.id}">${following ? 'Following ✓' : '+ Follow'}</button>`,
-    'Sign in to follow');
+    'Sign in to follow') : '';
+  
   return el(`
     <div class="disc-row" data-title="${item.title.toLowerCase()}" data-category="${item.category}"
          data-votes="${item.voteCount}" data-replies="${item.replyCount}"
@@ -85,7 +94,7 @@ function renderDiscussionRow(item, author){
         <div class="meta">
           <img class="avatar" style="width:24px;height:24px;" src="${author?author.avatarUrl:''}" alt="">
           <span>${author?author.nickname:'Member'}</span> ${roleBadge}
-          <span class="dot"></span><span>Updated ${FDM.utils.formatRelativeTime(item.updatedAt)}</span>
+          <span class="dot"></span><span>Updated ${FDM.utils && FDM.utils.formatRelativeTime ? FDM.utils.formatRelativeTime(item.updatedAt) : 'recently'}</span>
           <span class="dot"></span>${followBtn}
         </div>
       </div>
@@ -315,13 +324,13 @@ function adaptEventForCard(event){
 }
 /** Adapts an Article model into the shape renderNewsCard expects, resolving the byline against staff. */
 function renderArticleAsNewsCard(article){
-  const author = (FDM.data.staff || []).find(s => s.id === article.authorId);
+  const author = (FDM.data && FDM.data.staff || []).find(s => s.id === article.authorId);
   return renderNewsCard({
     cat: article.category,
     title: article.title,
     author: author ? author.nickname : 'Forum della Moda',
     time: article.readingTime,
-    date: FDM.utils.formatDate(article.publishedAt),
+    date: FDM.utils && FDM.utils.formatDate ? FDM.utils.formatDate(article.publishedAt) : article.publishedAt,
     seed: article.imageSeed || article.id,
   });
 }
