@@ -21,6 +21,12 @@ window.FDM = window.FDM || {};
 
 (function(){
 
+  // Safe guard: check if required services exist
+  if(!FDM.permissions || !FDM.auth){
+    console.warn('ui.js: Required FDM.permissions and FDM.auth must be loaded first');
+    return;
+  }
+
   const { can, isAtLeast, label, ROLES } = FDM.permissions;
 
   /** Small role-badge chip, reused by the nav and (later) by comment/byline UI. */
@@ -38,7 +44,7 @@ window.FDM = window.FDM || {};
         <a href="login.html" class="auth-link">Sign In</a>
         <a href="register.html" class="btn btn-primary">Join the Community</a>`;
     }
-    const unread = (FDM.data.notifications || []).filter(n => n.userId === user.id && !n.isRead).length;
+    const unread = (FDM.data && FDM.data.notifications || []).filter(n => n.userId === user.id && !n.isRead).length;
     return `
       <a href="notifications.html" class="auth-bell" aria-label="Notifications, ${unread} unread">
         🔔${unread ? '<span class="auth-bell-dot"></span>' : ''}
@@ -108,7 +114,7 @@ window.FDM = window.FDM || {};
   function renderVoteControl(count, targetType, targetId){
     const user = FDM.auth.getCurrentUser();
     const enabled = can(user, 'VOTE');
-    const voteState = (targetType && targetId) ? FDM.session.getVoteState(targetType, targetId) : null;
+    const voteState = (targetType && targetId && FDM.session) ? FDM.session.getVoteState(targetType, targetId) : null;
     return `
       <div class="vote-control ${enabled ? '' : 'is-disabled'}" data-target-type="${targetType||''}" data-target-id="${targetId||''}">
         <button class="vote-btn ${voteState==='up'?'is-active':''}" data-dir="up" ${enabled ? '' : 'disabled title="Sign in to vote"'}>▲</button>
