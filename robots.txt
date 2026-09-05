@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /assets/
-Sitemap: https://italycircularfashion.github.io/PratoHub/sitemap.xml
