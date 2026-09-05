@@ -2,9 +2,6 @@
    TABLE OF CONTENTS + READING PROGRESS COMPONENT
    assets/components/toc.component.js
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
 
   /**
    * Mounts a sticky TOC into `tocId` from an Article's `sections`,
@@ -47,6 +44,5 @@ window.FDM = window.FDM || {};
     }
   }
 
-  FDM.tocComponent = { mount };
+  export const tocComponent = { mount };
 
-})();

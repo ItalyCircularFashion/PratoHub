@@ -4,6 +4,9 @@
    live in card.renderer.js + services/ and are already
    initialised by the time this file runs.
    ============================================================ */
+import { renderAgendaCard, renderNewsCard, renderPick, renderDiscussionRow, renderQuestionCard, renderEventCard } from './card.renderer.js';
+
+
 
 const agenda = [
   ["Manufacturing","Inside the Last Mile of Italian Knitwear","Marco Bianchi","6 min"],

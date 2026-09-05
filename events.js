@@ -1,6 +1,9 @@
 /* ============================================================
    EVENTS.JS — page-specific composition for events.html.
    ============================================================ */
+import { renderEventCard, renderEventCardFull, renderStatStrip } from './card.renderer.js';
+
+
 
 const events = FDM.data.events || [];
 

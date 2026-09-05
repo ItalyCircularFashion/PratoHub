@@ -1,6 +1,9 @@
 /* ============================================================
    QUESTIONS.JS — page-specific composition for questions.html.
    ============================================================ */
+import { renderStatStrip, adaptQuestionForCard } from './card.renderer.js';
+
+
 
 const questions = FDM.data.questions || [];
 

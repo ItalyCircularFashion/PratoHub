@@ -1,6 +1,9 @@
 /* ============================================================
    THREAD.JS — page-specific composition for thread.html only.
    ============================================================ */
+import { renderStatStrip, renderErrorState, renderUserCard, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+
+
 
 const discussion = FDM.knowledgeGraph.findDiscussion('disc-erp');
 

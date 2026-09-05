@@ -7,8 +7,6 @@
    needs: TOC sections, citations, and the cross-links that
    make the article behave like a node in the knowledge graph.
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} ArticleSection
@@ -40,7 +38,7 @@ FDM.models = FDM.models || {};
  * @property {string[]} relatedArticleIds
  * @property {string[]} relatedDiscussionIds
  * @property {string[]} relatedQuestionIds
- * @property {string[]} relatedMarketSymbols   - resolved against FDM.data.commodities
+ * @property {string[]} relatedMarketSymbols
  * @property {string[]} relatedEventIds
  * @property {'draft'|'published'|'scheduled'|'archived'} status
  * @property {string|null} scheduledAt
@@ -50,9 +48,9 @@ FDM.models = FDM.models || {};
  * @property {string} imageSeed                - picsum seed for thumbnail contexts (kept distinct from heroImageUrl)
  * @property {Object[]} galleryImages           - [{src, alt, caption}]
  * @property {Object[]} revisionHistory         - [{date, label, note}]
- * @property {string|null} pollId               - resolved via FDM.knowledgeGraph.findPoll()
+ * @property {string|null} pollId
  */
-FDM.models.createArticle = function createArticle(overrides){
+export function createArticle(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

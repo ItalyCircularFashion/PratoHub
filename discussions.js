@@ -3,6 +3,9 @@
    Every render, lookup, permission check and interaction wiring
    is delegated to an existing FDM service/component/renderer.
    ============================================================ */
+import { renderDiscussionRow, renderStatStrip } from './card.renderer.js';
+
+
 
 const discussions = FDM.data.discussions || [];
 

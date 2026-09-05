@@ -2,8 +2,6 @@
    DISCUSSION MODEL
    assets/models/discussion.model.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} Discussion
@@ -30,7 +28,7 @@ FDM.models = FDM.models || {};
  * @property {string[]} recommendedExpertIds
  * @property {string[]} moderatorNotes        - internal notes, never shown to regular users
  */
-FDM.models.createDiscussion = function createDiscussion(overrides){
+export function createDiscussion(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

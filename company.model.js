@@ -2,10 +2,8 @@
    COMPANY MODEL
    assets/models/company.model.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
-FDM.models.createCompany = function createCompany(overrides){
+export function createCompany(overrides){
   return Object.assign({
     id: null, name: '', logoUrl: '', city: '', district: '', region: 'Tuscany', country: 'IT',
     specialization: '', description: '', foundedYear: null, employeeRange: '',

@@ -1,6 +1,9 @@
 /* ============================================================
    COMMUNITY.JS — page-specific composition for community.html.
    ============================================================ */
+import { renderDiscussionRow, renderStatStrip, renderUserCard, adaptQuestionForCard } from './card.renderer.js';
+
+
 
 const experts  = FDM.data.experts || [];
 const staff    = FDM.data.staff   || [];

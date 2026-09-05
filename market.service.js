@@ -1,14 +1,9 @@
 /* ============================================================
    MARKET SERVICE
-   assets/services/market.service.js
-
+   services/market.service.js
    Mock data shaped exactly like a real feed would return it.
-   Swap `commodities` for a fetch() to Trading Economics / ICE
-   Futures / Yahoo Finance / an internal ERP endpoint — no
-   markup or card changes required anywhere on the site.
    Shape: { name, unit, value, changeDaily, changeWeekly, changeMonthly, series, updatedAt }
    ============================================================ */
-window.FDM = window.FDM || {};
 
 function genSeries(seed, points=14){
   let s = seed; const rnd = () => { s = (s*9301+49297)%233280; return s/233280; };
@@ -16,7 +11,10 @@ function genSeries(seed, points=14){
   for(let i=0;i<points;i++){ v += (rnd()-0.5)*6; out.push(v); }
   return out;
 }
-const commodities = [
+
+function el(h){ const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; }
+
+export const commodities = [
   {name:"Cotton", unit:"USD / lb", value:0.82, changeDaily:0.6, changeWeekly:1.4, changeMonthly:-2.1, seed:11},
   {name:"Wool", unit:"AUD / kg (clean)", value:14.35, changeDaily:-0.3, changeWeekly:0.8, changeMonthly:3.2, seed:22},
   {name:"Silk", unit:"USD / kg", value:48.20, changeDaily:0.1, changeWeekly:-0.6, changeMonthly:1.1, seed:33},
@@ -36,8 +34,9 @@ const commodities = [
   {name:"Indigo Dye Index", unit:"USD / kg", value:9.85, changeDaily:0.2, changeWeekly:0.4, changeMonthly:-1.1, seed:187},
 ].map(c => ({...c, series: genSeries(c.seed), updatedAt: "2 min ago"}));
 
-function trendClass(n){ return n > 0.05 ? 'pos' : n < -0.05 ? 'neg' : 'flat'; }
-function sparkSvg(series, cls){
+export function trendClass(n){ return n > 0.05 ? 'pos' : n < -0.05 ? 'neg' : 'flat'; }
+
+export function sparkSvg(series, cls){
   const w=160, h=40, min=Math.min(...series), max=Math.max(...series), range=(max-min)||1;
   const pts = series.map((v,i)=>{
     const x = (i/(series.length-1))*w;
@@ -49,7 +48,8 @@ function sparkSvg(series, cls){
     <polyline points="${pts}" fill="none" stroke="${colorVar}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
 }
-function fullCard(c){
+
+export function fullCard(c){
   const cls = trendClass(c.changeDaily);
   const arrow = cls==='pos' ? '▲' : cls==='neg' ? '▼' : '·';
   const fmt = (n) => `${n>0?'+':''}${n}%`;
@@ -70,7 +70,8 @@ function fullCard(c){
     </div>
   </div>`);
 }
-function compactCard(c){
+
+export function compactCard(c){
   const cls = trendClass(c.changeDaily);
   const arrow = cls==='pos' ? '▲' : cls==='neg' ? '▼' : '·';
   return el(`<div class="mkt-card mkt-card--compact" data-commodity="${c.name}">
@@ -81,9 +82,10 @@ function compactCard(c){
     ${sparkSvg(c.series, cls)}
   </div>`);
 }
-const byName = (n) => commodities.find(c => c.name === n);
 
-function mountMarketTickers(){
+export const byName = (n) => commodities.find(c => c.name === n);
+
+export function mountMarketTickers(){
   const tickerLeft = document.getElementById('tickerLeft');
   const tickerRight = document.getElementById('tickerRight');
   if(!tickerLeft || !tickerRight) return;
@@ -105,11 +107,10 @@ function mountMarketTickers(){
   window.addEventListener('resize', update);
   update();
 }
-function mountMarketGrid(targetId, data){
+
+export function mountMarketGrid(targetId, data){
   const grid = document.getElementById(targetId || 'marketGrid');
   if(grid) grid.append(...(data || commodities).map(fullCard));
 }
-
-FDM.market = { commodities, genSeries, trendClass, sparkSvg, fullCard, compactCard, byName, mountMarketTickers, mountMarketGrid };
 
 mountMarketTickers();

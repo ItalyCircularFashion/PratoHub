@@ -4,9 +4,6 @@
    Voting is gated through FDM.permissions.canVote — no page
    ever checks the user's role directly.
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
 
   /**
    * @param {string} containerId
@@ -64,6 +61,5 @@ window.FDM = window.FDM || {};
     document.addEventListener('fdm:authchange', render);
   }
 
-  FDM.pollComponent = { mount };
+  export const pollComponent = { mount };
 
-})();

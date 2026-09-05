@@ -1,20 +1,18 @@
 /* ============================================================
    VALIDATION UTILS
-   assets/utils/validation.js
+   utils/validation.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.utils = FDM.utils || {};
 
-FDM.utils.validateEmail = function(value){
+export function validateEmail(value){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim());
-};
+}
 /** Nickname is the mandatory public identity: 3-24 chars, letters/numbers/._- */
-FDM.utils.validateNickname = function(value){
+export function validateNickname(value){
   return /^[a-zA-Z0-9._-]{3,24}$/.test(String(value||'').trim());
-};
-FDM.utils.validatePassword = function(value){
+}
+export function validatePassword(value){
   return String(value||'').length >= 8;
-};
-FDM.utils.validateRequired = function(value){
+}
+export function validateRequired(value){
   return String(value||'').trim().length > 0;
-};
+}

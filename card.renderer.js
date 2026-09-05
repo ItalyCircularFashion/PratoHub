@@ -1,15 +1,34 @@
 /* ============================================================
    CARD RENDERERS
-   assets/renderers/card.renderer.js
+   renderers/card.renderer.js
 
    Every reusable card on the platform is rendered from here.
    No page builds its own card markup — pages only supply data
-   to these functions. Extracted from the original main.js as
-   part of the v3 foundation refactor (see services/ for the
-   market, navigation and interaction engines that used to live
-   alongside these in the same file).
+   to these functions.
    ============================================================ */
-window.FDM = window.FDM || {};
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { articles, staff } from './articles.data.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { commodities } from './market.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { commentService } from './comment.service.js';
+import { commentComponent } from './comment.component.js';
+import { galleryComponent } from './gallery.component.js';
+import { pollComponent } from './poll.component.js';
+import { shareComponent } from './share.component.js';
+import { moderationComponent } from './moderation.component.js';
+import { tocComponent } from './toc.component.js';
 
 // ---- DOM helper ----
 function el(h){ const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; }
@@ -45,7 +64,6 @@ function renderPick(item){
 }
 function renderDiscussionRow(item, author){
   if(Array.isArray(item)){
-    // Legacy shape used by index.html/news.html — output unchanged.
     const [cat,title,votes,replies,avs] = item;
     return el(`
       <div class="disc-row">
@@ -62,24 +80,21 @@ function renderDiscussionRow(item, author){
       </div>`);
   }
   
-  // Validation for full Discussion model
   if(!item || typeof item !== 'object'){
     console.error('Invalid discussion item:', item);
     return el('<div class="disc-row"></div>');
   }
   
-  // Full Discussion model — richer status badges, real author + timestamps,
-  // plus data attributes the interaction service sorts/filters by.
   const badges = [
     item.isPinned && '<span class="tag">Pinned</span>',
     item.acceptedAnswerId && '<span class="tag" style="color:var(--mkt-pos); border-color:var(--mkt-pos);">Solved</span>',
     item.moderationStatus === 'locked' && '<span class="tag">Locked</span>',
   ].filter(Boolean).join(' ');
   
-  const roleBadge = (author && FDM.components && FDM.components.renderRoleBadge) ? FDM.components.renderRoleBadge(author) : '';
-  const user = FDM.auth ? FDM.auth.getCurrentUser() : null;
-  const following = user && FDM.session && FDM.permissions && FDM.permissions.canFollow && FDM.permissions.canFollow(user) && FDM.session.isFollowing('discussion', item.id);
-  const followBtn = FDM.components && FDM.components.gateOrCta ? FDM.components.gateOrCta('FOLLOW_DISCUSSION',
+  const roleBadge = (author && window.FDM_components && window.FDM_components.renderRoleBadge) ? window.FDM_components.renderRoleBadge(author) : '';
+  const user = auth ? auth.getCurrentUser() : null;
+  const following = user && session && permissions && permissions.canFollow && permissions.canFollow(user) && session.isFollowing('discussion', item.id);
+  const followBtn = window.FDM_components && window.FDM_components.gateOrCta ? window.FDM_components.gateOrCta('FOLLOW_DISCUSSION',
     `<button class="comment-action follow-toggle" data-id="${item.id}">${following ? 'Following ✓' : '+ Follow'}</button>`,
     'Sign in to follow') : '';
   
@@ -94,7 +109,7 @@ function renderDiscussionRow(item, author){
         <div class="meta">
           <img class="avatar" style="width:24px;height:24px;" src="${author?author.avatarUrl:''}" alt="">
           <span>${author?author.nickname:'Member'}</span> ${roleBadge}
-          <span class="dot"></span><span>Updated ${FDM.utils && FDM.utils.formatRelativeTime ? FDM.utils.formatRelativeTime(item.updatedAt) : 'recently'}</span>
+          <span class="dot"></span><span>Updated ${formatRelativeTime(item.updatedAt)}</span>
           <span class="dot"></span>${followBtn}
         </div>
       </div>
@@ -118,7 +133,6 @@ function renderQuestionCard(q){
       </div>
     </div>`);
 }
-/** Standard compact event card — unchanged, used by hompage/article/thread sidebars. */
 function renderEventCard(item){
   const [day,mon,type,title] = item;
   return el(`
@@ -131,7 +145,6 @@ function renderEventCard(item){
       </div>
     </div>`);
 }
-/** Full event card for events.html — consumes the richer event object shape. */
 function renderEventCardFull(ev){
   return el(`
     <div class="event-card-full ${ev.past?'is-past':''}" data-type="${ev.type.toLowerCase()}" data-title="${ev.title.toLowerCase()}" data-day="${ev.day}">
@@ -150,12 +163,11 @@ function renderEventCardFull(ev){
     </div>`);
 }
 
-/* ---- NEW shared components ---- */
+/* ---- Shared components ---- */
 
-/** Compact author byline card — used on article bylines and expert mentions. */
 function renderAuthorCard(user){
   if(!user) return el('<div class="author-card"></div>');
-  const badge = (FDM.components && FDM.components.renderRoleBadge) ? FDM.components.renderRoleBadge(user) : '';
+  const badge = (window.FDM_components && window.FDM_components.renderRoleBadge) ? window.FDM_components.renderRoleBadge(user) : '';
   return el(`
     <div class="author-card">
       <img class="avatar" src="${user.avatarUrl||''}" alt="">
@@ -166,9 +178,8 @@ function renderAuthorCard(user){
     </div>`);
 }
 
-/** Generic member/user card — community directory, follower lists, expert grids. */
 function renderUserCard(user){
-  const badge = (FDM.components && FDM.components.renderRoleBadge) ? FDM.components.renderRoleBadge(user) : '';
+  const badge = (window.FDM_components && window.FDM_components.renderRoleBadge) ? window.FDM_components.renderRoleBadge(user) : '';
   const expertise = (user.expertise || []).join(', ');
   return el(`
     <div class="user-card" data-title="${(user.nickname||'').toLowerCase()}" data-expertise="${expertise.toLowerCase()}">
@@ -181,16 +192,10 @@ function renderUserCard(user){
     </div>`);
 }
 
-/**
- * Renders one comment/reply node, including nested children.
- * @param {Object} comment - FDM.models.createComment() shape
- * @param {Object} author - resolved user for comment.authorId
- * @param {Array} [children] - already-resolved child comments, each {comment, author, children}
- */
 function renderCommentItem(comment, author, children){
-  const time = (FDM.utils && FDM.utils.formatRelativeTime) ? FDM.utils.formatRelativeTime(comment.createdAt) : comment.createdAt;
-  const roleBadge = author ? ((FDM.components && FDM.components.renderRoleBadge) ? FDM.components.renderRoleBadge(author) : '') : '';
-  const vote = (FDM.components && FDM.components.renderVoteControl) ? FDM.components.renderVoteControl(comment.voteCount, 'comment', comment.id) : '';
+  const time = formatRelativeTime(comment.createdAt);
+  const roleBadge = author ? ((window.FDM_components && window.FDM_components.renderRoleBadge) ? window.FDM_components.renderRoleBadge(author) : '') : '';
+  const vote = (window.FDM_components && window.FDM_components.renderVoteControl) ? window.FDM_components.renderVoteControl(comment.voteCount, 'comment', comment.id) : '';
   const attachments = (comment.attachments && comment.attachments.length)
     ? `<div class="comment-attachments">${comment.attachments.map(a => `<a href="${a.url}" class="tag">📎 ${a.name}</a>`).join('')}</div>` : '';
   const node = el(`
@@ -231,9 +236,8 @@ function renderCommentItem(comment, author, children){
   return node;
 }
 
-/** Single notification list item. */
 function renderNotificationItem(n){
-  const time = (FDM.utils && FDM.utils.formatRelativeTime) ? FDM.utils.formatRelativeTime(n.createdAt) : n.createdAt;
+  const time = formatRelativeTime(n.createdAt);
   return el(`
     <a href="${n.link}" class="notification-item ${n.isRead?'':'is-unread'}">
       <span class="notification-dot"></span>
@@ -244,7 +248,6 @@ function renderNotificationItem(n){
     </a>`);
 }
 
-/** Generic empty state, used by any list that currently has zero items. */
 function renderEmptyState(message, hint){
   return el(`
     <div class="state-block state-empty">
@@ -252,11 +255,9 @@ function renderEmptyState(message, hint){
       ${hint ? `<div class="state-hint">${hint}</div>` : ''}
     </div>`);
 }
-/** Generic loading skeleton state. */
 function renderLoadingState(){
   return el(`<div class="state-block state-loading"><span class="state-spinner"></span> Loading…</div>`);
 }
-/** Generic error state, with optional retry callback wired by the caller. */
 function renderErrorState(message){
   return el(`
     <div class="state-block state-error">
@@ -265,27 +266,14 @@ function renderErrorState(message){
     </div>`);
 }
 
-/** Generic stat strip — used by article/discussion/event headers. @param {Array} stats - [{value,label}] */
 function renderStatStrip(stats){
-  const fmt = (n) => (FDM.utils && FDM.utils.formatCompactNumber) ? FDM.utils.formatCompactNumber(n) : n;
+  const fmt = (n) => formatCompactNumber(n);
   return el(`
     <div class="stat-strip">
       ${stats.map(s => `<div class="stat-item"><b>${typeof s.value==='number'?fmt(s.value):s.value}</b><span>${s.label}</span></div>`).join('')}
     </div>`);
 }
 
-/**
- * Mounts a Knowledge Graph panel: optional title + either rendered
- * items or an empty state. Used for every "Related X" panel so the
- * empty-state fallback logic exists exactly once. Pass an empty
- * string/falsy `title` to omit the heading (e.g. when the surrounding
- * sidebar block already renders its own title).
- * @param {string} targetId
- * @param {string} title
- * @param {Array} items
- * @param {function} itemRenderer - (item) => Node
- * @param {string} emptyMessage
- */
 function mountKgPanel(targetId, title, items, itemRenderer, emptyMessage){
   const target = document.getElementById(targetId);
   if(!target) return;
@@ -299,7 +287,6 @@ function mountKgPanel(targetId, title, items, itemRenderer, emptyMessage){
   target.appendChild(list);
 }
 
-/** Adapts a Question model + resolved expert into the shape renderQuestionCard expects. */
 function adaptQuestionForCard(question, expert){
   return renderQuestionCard({
     tags: question.tags, q: question.title, category: question.category, difficulty: question.difficulty,
@@ -314,23 +301,29 @@ function renderKgDiscussionItem(discussion){
       <span class="kg-meta">${discussion.replyCount} replies · ${discussion.voteCount} votes</span>
     </a>`);
 }
-/** Renders one row in a "Related Questions" knowledge-graph panel. */
 function renderKgQuestionItem(question){
   return el(`<a href="questions.html" class="kg-item-discussion">${question.title}</a>`);
 }
-/** Adapts an Event model into the tuple shape renderEventCard expects. */
 function adaptEventForCard(event){
   return [event.day, event.month, event.type, event.title];
 }
-/** Adapts an Article model into the shape renderNewsCard expects, resolving the byline against staff. */
 function renderArticleAsNewsCard(article){
-  const author = (FDM.data && FDM.data.staff || []).find(s => s.id === article.authorId);
+  const author = staff.find(s => s.id === article.authorId);
   return renderNewsCard({
     cat: article.category,
     title: article.title,
     author: author ? author.nickname : 'Forum della Moda',
     time: article.readingTime,
-    date: FDM.utils && FDM.utils.formatDate ? FDM.utils.formatDate(article.publishedAt) : article.publishedAt,
+    date: formatDate(article.publishedAt),
     seed: article.imageSeed || article.id,
   });
 }
+
+export {
+  renderAgendaCard, renderNewsCard, renderPick, renderDiscussionRow,
+  renderQuestionCard, renderEventCard, renderEventCardFull,
+  renderAuthorCard, renderUserCard, renderCommentItem, renderNotificationItem,
+  renderEmptyState, renderLoadingState, renderErrorState, renderStatStrip,
+  mountKgPanel, adaptQuestionForCard, renderKgDiscussionItem, renderKgQuestionItem,
+  adaptEventForCard, renderArticleAsNewsCard,
+};

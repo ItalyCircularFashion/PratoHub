@@ -1,11 +1,10 @@
-/* ============================================================
+/* =
+===========================================================
    EVENTS SEED DATA
    assets/data/events.data.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.data = FDM.data || {};
 
-FDM.data.events = [
+export const events = [
   { id:'ev-pittifilati', day:'27', month:'JUN', type:'Trade Show', title:'Pitti Filati — Florence', location:'Fortezza da Basso, Florence, Italy', description:'The international reference point for yarn and fibre innovation. Every major Italian spinner presents next-season developments here first.', registration:'https://pittimmagine.com/pitti-filati', past:true },
   { id:'ev-traceability', day:'03', month:'JUL', type:'Webinar', title:'Traceability in the Wool Supply Chain', location:'Online', description:'A two-hour practitioner session covering GOTS and RWS audit workflows, digital batch passports and how terzisti networks are handling upstream disclosure requirements.', registration:'#' },
   { id:'ev-milanomoda', day:'14', month:'JUL', type:'Fashion Week', title:'Milano Moda Donna Previews', location:'Various venues, Milan, Italy', description:'Pre-season brand previews ahead of the main Milan Women\'s Fashion Week calendar. Key sourcing meetings and supply-chain side events run in parallel.', registration:'#' },

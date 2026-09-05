@@ -2,8 +2,6 @@
    QUESTION MODEL
    assets/models/question.model.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} Question
@@ -28,7 +26,7 @@ FDM.models = FDM.models || {};
  * @property {string[]} relatedQuestionIds
  * @property {string[]} recommendedExpertIds
  */
-FDM.models.createQuestion = function createQuestion(overrides){
+export function createQuestion(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

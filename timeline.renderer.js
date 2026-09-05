@@ -1,11 +1,12 @@
 /* ============================================================
    TIMELINE RENDERER
-   assets/renderers/timeline.renderer.js
+   renderers/timeline.renderer.js
    ============================================================ */
-window.FDM = window.FDM || {};
+
+function el(h){ const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; }
 
 /** @param {Array} events - [{date, label, note}], chronological */
-function renderTimeline(events){
+export function renderTimeline(events){
   return el(`
     <div class="timeline">
       ${events.map(e => `

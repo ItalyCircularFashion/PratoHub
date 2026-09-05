@@ -17,17 +17,13 @@
    Re-runs automatically on 'fdm:authchange', so switching the
    mock user re-renders every gated element on the page.
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
-
-  // Safe guard: check if required services exist
-  if(!FDM.permissions || !FDM.auth){
+// Safe guard: check if required services exist
+  if(!permissions || !auth){
     console.warn('ui.js: Required FDM.permissions and FDM.auth must be loaded first');
     return;
   }
 
-  const { can, isAtLeast, label, ROLES } = FDM.permissions;
+  const { can, isAtLeast, label, ROLES } = permissions;
 
   /** Small role-badge chip, reused by the nav and (later) by comment/byline UI. */
   function renderRoleBadge(user){
@@ -153,7 +149,7 @@ window.FDM = window.FDM || {};
   applyPermissionVisibility();
   mountRoleSwitcher();
 
-  FDM.components = {
+  export const components = {
     renderRoleBadge, renderAuthNav, mountAuthNav,
     applyPermissionVisibility, gateOrCta,
     renderCommentComposer, renderVoteControl, mountRoleSwitcher,

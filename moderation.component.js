@@ -4,9 +4,6 @@
    Renders nothing for non-moderators. Mutates the in-memory
    model directly (no backend yet) and re-renders on change.
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
 
   function mountToolbar(containerId, discussion){
     const container = document.getElementById(containerId);
@@ -38,6 +35,5 @@ window.FDM = window.FDM || {};
     document.addEventListener('fdm:authchange', render);
   }
 
-  FDM.moderationComponent = { mountToolbar };
+  export const moderationComponent = { mountToolbar };
 
-})();

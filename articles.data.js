@@ -1,28 +1,28 @@
 /* ============================================================
    ARTICLES SEED DATA
-   assets/data/articles.data.js
+   data/articles.data.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.data = FDM.data || {};
+import { createArticle } from './article.model.js';
+import { createUser } from './user.model.js';
 
-// Editorial staff (Administrators). Kept separate from FDM.data.experts —
+// Editorial staff (Administrators). Kept separate from experts —
 // experts are community members with domain authority, staff are the
 // editorial desk that holds PUBLISH_ARTICLE / EDIT_ANY_CONTENT capability.
-FDM.data.staff = [
-  FDM.models.createUser({
+export const staff = [
+  createUser({
     id:'u-1', nickname:'marco.bianchi', role:'admin',
     professionalRole:'Senior Editor, Business', country:'Italy',
     avatarUrl:'https://picsum.photos/seed/editor22/120/120', reputation:9000, badges:['Administrator'],
   }),
-  FDM.models.createUser({
+  createUser({
     id:'u-2', nickname:'isabella.romano', role:'admin',
     professionalRole:'Editor-in-Chief', country:'Italy',
     avatarUrl:'https://picsum.photos/seed/editor11/120/120', reputation:9500, badges:['Administrator'],
   }),
 ];
 
-FDM.data.articles = [
-  FDM.models.createArticle({
+export const articles = [
+  createArticle({
     id:'art-tariff-spreadsheet',
     slug:'tariff-spreadsheet-sourcing-directors',
     title:"Inside the Tariff Spreadsheet Every Sourcing Director Is Now Quietly Sharing",
@@ -62,21 +62,21 @@ FDM.data.articles = [
       { date:'Jun 28, 08:15', label:'Added sourcing director response' },
     ],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-cashmere-economics', slug:'recycled-cashmere-economics',
     title:'The Economics of Recycled Cashmere', category:'Circular Fashion', tags:['Cashmere','Circular Fashion','Recycling'],
     heroImageUrl:'https://picsum.photos/seed/cashmere9/700/880', imageSeed:'cashmere9',
     authorId:'u-1', status:'published', readingTime:8, commentCount:14, viewCount:6200,
     publishedAt:'2026-06-24T09:00:00Z',
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-flagship-shrink', slug:'flagship-stores-shrinking',
     title:'Why Flagship Stores Are Shrinking', category:'Retail', tags:['Retail','Store Design'],
     heroImageUrl:'https://picsum.photos/seed/flagship8/700/880', imageSeed:'flagship8',
     authorId:'u-2', status:'published', readingTime:4, commentCount:9, viewCount:4100,
     publishedAt:'2026-06-25T09:00:00Z',
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-changeover-time', slug:'cutting-changeover-time-lean',
     title:'The 90-Minute Changeover: How One Cut-and-Sew Line Cut It to 22',
     category:'Lean Manufacturing', tags:['Lean Manufacturing','OEE','Changeover'],
@@ -84,7 +84,7 @@ FDM.data.articles = [
     authorId:'u-1', status:'published', readingTime:9, commentCount:21, viewCount:7400,
     publishedAt:'2026-06-21T09:00:00Z', relatedDiscussionIds:['disc-changeover'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-spc-quality', slug:'spc-knitting-line-quality',
     title:'What Statistical Process Control Actually Catches on a Knitting Line',
     category:'Quality Engineering', tags:['SPC','Quality Engineering','Knitting'],
@@ -92,7 +92,7 @@ FDM.data.articles = [
     authorId:'u-2', status:'published', readingTime:7, commentCount:11, viewCount:3900,
     publishedAt:'2026-06-19T09:00:00Z', relatedDiscussionIds:['disc-spc-knitting'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-reactive-dye-batch', slug:'reactive-dye-batch-consistency',
     title:'Inside the Batch Sheet: How Dyehouses Are Closing the Colour Consistency Gap',
     category:'Dyeing', tags:['Dyeing','Colour Matching','Reactive Dyes'],
@@ -101,7 +101,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-16T09:00:00Z', relatedDiscussionIds:['disc-colorconsistency'],
     relatedExpertIds:['exp-chiara'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-rapier-tech', slug:'rapier-loom-fine-count-cotton',
     title:'Why Fine-Count Cotton Is Still Breaking Rapier Looms in 2026',
     category:'Weaving', tags:['Weaving','Rapier Looms','Yarn Quality'],
@@ -110,7 +110,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-15T09:00:00Z', relatedDiscussionIds:['disc-warpbreaks'],
     relatedExpertIds:['exp-paolo'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-stenter-finishing', slug:'stenter-finishing-energy-gsm',
     title:'The Stenter Frame Trade-Off: Energy Savings Without Losing GSM',
     category:'Finishing', tags:['Finishing','Energy Efficiency','Stenter'],
@@ -119,7 +119,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-13T09:00:00Z', relatedDiscussionIds:['disc-stenter-energy'],
     relatedExpertIds:['exp-anna'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-microfiber-shedding', slug:'microfiber-shedding-construction',
     title:'The Quiet Fix for Microfiber Shedding Nobody Wants to Pay For',
     category:'Sustainability', tags:['Sustainability','Microfiber Shedding','Water Treatment'],
@@ -128,7 +128,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-10T09:00:00Z', relatedDiscussionIds:['disc-waterreuse'],
     relatedExpertIds:['exp-davide'], pollId:'poll-microfiber',
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-pilling-standards', slug:'pilling-test-lab-variance',
     title:'Why Two Accredited Labs Can Disagree on the Same Pilling Sample',
     category:'Laboratory Testing', tags:['Lab Testing','Pilling','ISO 12945'],
@@ -137,7 +137,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-12T09:00:00Z', relatedDiscussionIds:['disc-pilling-lab'],
     relatedExpertIds:['exp-sofia'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-nearshoring-numbers', slug:'nearshoring-landed-cost-2026',
     title:'We Ran the Landed-Cost Numbers on Nearshoring. The Answer Was Not Simple.',
     category:'Supply Chain', tags:['Supply Chain','Nearshoring','Landed Cost'],
@@ -146,7 +146,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-09T09:00:00Z', relatedDiscussionIds:['disc-nearshoring'],
     relatedExpertIds:['exp-marta'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-predictive-maintenance', slug:'predictive-maintenance-looms-sensors',
     title:'Which Loom Sensors Actually Pay for Themselves Within a Year',
     category:'Maintenance', tags:['Maintenance','Predictive Maintenance','Looms'],
@@ -155,7 +155,7 @@ FDM.data.articles = [
     publishedAt:'2026-06-20T09:00:00Z', relatedDiscussionIds:['disc-predictive-maint'],
     relatedExpertIds:['exp-marco'],
   }),
-  FDM.models.createArticle({
+  createArticle({
     id:'art-ai-inspection', slug:'ai-fabric-inspection-cameras-roi',
     title:'AI Fabric Inspection Cameras: What the First Adopters Actually Got Back',
     category:'Textile Technology', tags:['AI','Defect Detection','Automation'],

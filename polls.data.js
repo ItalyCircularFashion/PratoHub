@@ -1,12 +1,16 @@
-/* ============================================================
+/* =
+im
+import { createPoll } from './poll.model.js';
+
+port { createPoll } from './poll.model.js';
+
+===========================================================
    POLLS SEED DATA
    assets/data/polls.data.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.data = FDM.data || {};
 
-FDM.data.polls = [
-  FDM.models.createPoll({
+export const polls = [
+  createPoll({
     id:'poll-tariff', targetType:'article', targetId:'art-tariff-spreadsheet',
     question:'Has your sourcing strategy changed because of the new tariffs?',
     options:[
@@ -15,7 +19,7 @@ FDM.data.polls = [
       { id:'no', label:'No change yet', votes:151 },
     ],
   }),
-  FDM.models.createPoll({
+  createPoll({
     id:'poll-microfiber', targetType:'article', targetId:'art-microfiber-shedding',
     question:'Has your mill invested in microfiber filtration at the washing or finishing stage?',
     options:[

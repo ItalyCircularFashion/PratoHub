@@ -2,8 +2,6 @@
    NOTIFICATION MODEL
    assets/models/notification.model.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} Notification
@@ -16,7 +14,7 @@ FDM.models = FDM.models || {};
  * @property {boolean} isRead
  * @property {string} createdAt
  */
-FDM.models.createNotification = function createNotification(overrides){
+export function createNotification(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

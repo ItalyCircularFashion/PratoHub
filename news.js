@@ -4,6 +4,9 @@
    site-wide behaviours (header, reveal, folio, chips, pagination,
    newsletter) live in main.js and are already initialised.
    ============================================================ */
+import { renderAgendaCard, renderNewsCard, renderPick, renderArticleAsNewsCard } from './card.renderer.js';
+
+
 
 // "Latest Articles" — uniform grid, no lead card (the lead story already
 // has its own Top Story treatment above, reusing the .featured component).

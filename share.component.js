@@ -2,9 +2,6 @@
    SHARE / BOOKMARK COMPONENT
    assets/components/share.component.js
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
 
   function mount(containerId, content){
     const container = document.getElementById(containerId);
@@ -58,6 +55,5 @@ window.FDM = window.FDM || {};
     document.addEventListener('fdm:authchange', render);
   }
 
-  FDM.shareComponent = { mount };
+  export const shareComponent = { mount };
 
-})();

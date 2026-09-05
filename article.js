@@ -5,6 +5,9 @@
    component or renderer. This file only decides WHAT to mount
    WHERE — never HOW.
    ============================================================ */
+import { renderEventCard, renderStatStrip, renderAuthorCard, renderErrorState, renderEmptyState, renderUserCard, renderTimeline, mountKgPanel, adaptEventForCard, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+
+
 
 const article = FDM.knowledgeGraph.findArticle('art-tariff-spreadsheet');
 

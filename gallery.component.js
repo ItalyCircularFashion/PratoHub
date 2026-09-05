@@ -5,9 +5,6 @@
    about to enter the viewport (lazy mount), and every <img>
    uses loading="lazy" on top of that.
    ============================================================ */
-window.FDM = window.FDM || {};
-
-(function(){
 
   /** @param {string} containerId  @param {Array} images - [{src, alt, caption}] */
   function mount(containerId, images){
@@ -79,6 +76,5 @@ window.FDM = window.FDM || {};
     io.observe(container);
   }
 
-  FDM.galleryComponent = { mount };
+  export const galleryComponent = { mount };
 
-})();

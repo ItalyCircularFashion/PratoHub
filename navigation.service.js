@@ -1,8 +1,7 @@
 /* ============================================================
    NAVIGATION SERVICE
-   assets/services/navigation.service.js
+   services/navigation.service.js
    ============================================================ */
-window.FDM = window.FDM || {};
 
 function initHeaderScroll(){
   const header = document.getElementById('siteHeader');
@@ -23,7 +22,6 @@ function initFolioRail(){
   }, {threshold:.5});
   sections.forEach(s => folioIO.observe(s));
 }
-/** Renders a breadcrumb trail. `trail` = [{label, href}, ...], last item has no href. */
 function renderBreadcrumbs(trail){
   return trail.map((step, i) => {
     const isLast = i === trail.length - 1;
@@ -37,7 +35,7 @@ function mountBreadcrumbs(targetId, trail){
   if(el) el.innerHTML = renderBreadcrumbs(trail);
 }
 
-FDM.navigation = { initHeaderScroll, initFolioRail, renderBreadcrumbs, mountBreadcrumbs };
+export const navigation = { initHeaderScroll, initFolioRail, renderBreadcrumbs, mountBreadcrumbs };
 
 initHeaderScroll();
 initFolioRail();

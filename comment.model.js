@@ -6,8 +6,6 @@
    question answers. `targetType`/`targetId` make it polymorphic
    instead of needing three near-identical models.
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} Comment
@@ -31,7 +29,7 @@ FDM.models = FDM.models || {};
  * @property {number} reportCount
  * @property {boolean} isReported
  */
-FDM.models.createComment = function createComment(overrides){
+export function createComment(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

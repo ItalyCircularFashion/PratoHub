@@ -2,8 +2,6 @@
    CATEGORY MODEL
    assets/models/category.model.js
    ============================================================ */
-window.FDM = window.FDM || {};
-FDM.models = FDM.models || {};
 
 /**
  * @typedef {Object} Category
@@ -14,7 +12,7 @@ FDM.models = FDM.models || {};
  * @property {number} articleCount
  * @property {number} discussionCount
  */
-FDM.models.createCategory = function createCategory(overrides){
+export function createCategory(overrides){
   overrides = overrides || {};
   return Object.assign({
     id: null,

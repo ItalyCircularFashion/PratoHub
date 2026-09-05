@@ -1,10 +1,10 @@
 /* ============================================================
    INTERACTION SERVICE
-   assets/services/interaction.service.js
+   services/interaction.service.js
    Reveal-on-scroll, chip filters, pagination, search-bar wiring,
-   and the newsletter form. Every init is null-safe.
+   and the newsletter form.
    ============================================================ */
-window.FDM = window.FDM || {};
+import { session } from './session.service.js';
 
 function initReveal(){
   const revealEls = document.querySelectorAll('.reveal');
@@ -62,7 +62,6 @@ function wireSearchFilter(formSelector, itemsContainerSelector, itemSelector){
   input.addEventListener('input', apply);
   form.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
 }
-/** Generic client-side sort: `compareFns` keyed by the <select> option value. */
 function wireSortSelect(selectSelector, itemsContainerSelector, compareFns){
   const select = document.querySelector(selectSelector);
   const container = document.querySelector(itemsContainerSelector);
@@ -73,7 +72,6 @@ function wireSortSelect(selectSelector, itemsContainerSelector, compareFns){
     [...container.children].sort(fn).forEach(node => container.appendChild(node));
   });
 }
-/** Generic chip-driven filter: clicking a chip shows only items whose data-{dataAttr} matches (an "All" chip clears it). */
 function wireChipFilter(chipsSelector, itemsContainerSelector, itemSelector, dataAttr){
   const chips = document.querySelector(chipsSelector);
   const container = document.querySelector(itemsContainerSelector);
@@ -88,12 +86,10 @@ function wireChipFilter(chipsSelector, itemsContainerSelector, itemSelector, dat
     });
   });
 }
-/** Category-filter convenience wrapper, kept for existing call sites. */
 function wireChipCategoryFilter(chipsSelector, itemsContainerSelector, itemSelector){
   wireChipFilter(chipsSelector, itemsContainerSelector, itemSelector, 'category');
 }
 
-/** One delegated listener for every .vote-control on the page — comments, discussions, anything. */
 function initVoteControls(){
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.vote-btn');
@@ -101,16 +97,16 @@ function initVoteControls(){
     const control = btn.closest('.vote-control');
     const { targetType, targetId } = control.dataset;
     if(!targetType || !targetId) return;
-    const delta = FDM.session.castVote(targetType, targetId, btn.dataset.dir);
+    const delta = session.castVote(targetType, targetId, btn.dataset.dir);
     const countEl = control.querySelector('.vote-count');
     countEl.textContent = Number(countEl.textContent) + delta;
     control.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('is-active'));
-    const state = FDM.session.getVoteState(targetType, targetId);
+    const state = session.getVoteState(targetType, targetId);
     if(state) control.querySelector(`[data-dir="${state}"]`).classList.add('is-active');
   });
 }
 
-FDM.interaction = { initReveal, initChipFilters, initNewsletterForm, initPagination, initSearchBars, wireSearchFilter, wireSortSelect, wireChipFilter, wireChipCategoryFilter, initVoteControls };
+export const interaction = { initReveal, initChipFilters, initNewsletterForm, initPagination, initSearchBars, wireSearchFilter, wireSortSelect, wireChipFilter, wireChipCategoryFilter, initVoteControls };
 
 initReveal();
 initChipFilters();

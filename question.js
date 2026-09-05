@@ -2,6 +2,9 @@
    QUESTION.JS — page-specific composition for question.html.
    Mirrors thread.js. Pure orchestration only.
    ============================================================ */
+import { renderStatStrip, renderErrorState, renderUserCard, renderCommentItem, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+
+
 
 const question = FDM.knowledgeGraph.findQuestion('q-jacquard');
 
