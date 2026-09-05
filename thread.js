@@ -1,11 +1,31 @@
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { components } from './ui.js';
+import { commentService } from './comment.service.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { staff } from './articles.data.js';
+import { articles } from './articles.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { renderStatStrip, renderErrorState, renderUserCard, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+
+export function initThread(){
 /* ============================================================
    THREAD.JS — page-specific composition for thread.html only.
    ============================================================ */
-import { renderStatStrip, renderErrorState, renderUserCard, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
 
 
 
-const discussion = FDM.knowledgeGraph.findDiscussion('disc-erp');
+const discussion = knowledgeGraph.findDiscussion('disc-erp');
 
 if(!discussion){
   document.getElementById('threadHero').appendChild(renderErrorState('This discussion could not be found.'));
@@ -14,9 +34,9 @@ if(!discussion){
 }
 
 function renderThreadPage(discussion){
-  const author = FDM.knowledgeGraph.findUser(discussion.authorId);
+  const author = knowledgeGraph.findUser(discussion.authorId);
 
-  FDM.navigation.mountBreadcrumbs('threadBreadcrumbs', [
+  navigation.mountBreadcrumbs('threadBreadcrumbs', [
     { label:'Home', href:'index.html' },
     { label:'Discussions', href:'discussions.html' },
     { label:discussion.category, href:'discussions.html' },
@@ -34,8 +54,8 @@ function renderThreadPage(discussion){
   document.getElementById('threadByline').innerHTML = `
     <img class="avatar" style="width:28px;height:28px;" src="${author?author.avatarUrl:''}" alt="">
     <span>${author?author.nickname:'Member'}</span>
-    ${FDM.components.renderRoleBadge(author)}
-    <span class="dot"></span><span>Started ${FDM.utils.formatRelativeTime(discussion.createdAt)}</span>
+    ${components.renderRoleBadge(author)}
+    <span class="dot"></span><span>Started ${formatRelativeTime(discussion.createdAt)}</span>
     <span class="dot"></span><span>${discussion.readingTime} min read</span>`;
 
   document.getElementById('threadStats').appendChild(renderStatStrip([
@@ -44,7 +64,7 @@ function renderThreadPage(discussion){
     { value: discussion.followerIds.length, label:'Followers' },
   ]));
 
-  document.getElementById('threadOpVote').innerHTML = FDM.components.renderVoteControl(discussion.voteCount, 'discussion', discussion.id);
+  document.getElementById('threadOpVote').innerHTML = components.renderVoteControl(discussion.voteCount, 'discussion', discussion.id);
 
   FDM.shareComponent.mount('threadShare', {
     targetType:'discussion', targetId:discussion.id, title:discussion.title, url:window.location.href,
@@ -54,16 +74,17 @@ function renderThreadPage(discussion){
   FDM.moderationComponent.mountToolbar('threadModeration', discussion);
 
   // ---- Comments: nested replies, voting, accepted answer, expert/mod/admin badges ----
-  const commentCount = FDM.commentService.getCommentsFor('discussion', discussion.id).length;
-  FDM.commentService.mountThreadFor('threadComments', 'discussion', discussion.id, {
+  const commentCount = commentService.getCommentsFor('discussion', discussion.id).length;
+  commentService.mountThreadFor('threadComments', 'discussion', discussion.id, {
     composerPlaceholder: discussion.moderationStatus === 'locked'
       ? 'This thread is locked.' : 'Add a reply… (Markdown supported)',
   });
 
   // ---- Knowledge graph sidebar ----
-  const related = FDM.knowledgeGraph.getRelatedForDiscussion(discussion);
+  const related = knowledgeGraph.getRelatedForDiscussion(discussion);
   mountKgPanel('threadExperts', '', related.experts, renderUserCard, 'No experts linked to this thread yet.');
   mountKgPanel('threadSimilar', '', related.discussions, renderKgDiscussionItem, 'No similar discussions yet.');
   mountKgPanel('threadQuestions', '', related.questions, renderKgQuestionItem, 'No related questions yet.');
   mountKgPanel('threadArticles', '', related.articles, renderArticleAsNewsCard, 'No related articles yet.');
+}
 }

@@ -1,18 +1,38 @@
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { components } from './ui.js';
+import { commentService } from './comment.service.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { staff } from './articles.data.js';
+import { articles } from './articles.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { renderDiscussionRow, renderStatStrip, renderUserCard, adaptQuestionForCard } from './card.renderer.js';
+
+export function initCommunity(){
 /* ============================================================
    COMMUNITY.JS — page-specific composition for community.html.
    ============================================================ */
-import { renderDiscussionRow, renderStatStrip, renderUserCard, adaptQuestionForCard } from './card.renderer.js';
 
 
 
-const experts  = FDM.data.experts || [];
-const staff    = FDM.data.staff   || [];
-const discs    = FDM.data.discussions || [];
-const qs       = FDM.data.questions  || [];
-const comments = FDM.data.comments   || [];
+const experts  = experts || [];
+const staff    = staff   || [];
+const discs    = discussions || [];
+const qs       = questions  || [];
+const comments = comments   || [];
 
 // ---- Breadcrumbs ----
-FDM.navigation.mountBreadcrumbs('commBreadcrumbs', [
+navigation.mountBreadcrumbs('commBreadcrumbs', [
   { label:'Home', href:'index.html' },
   { label:'Community' },
 ]);
@@ -28,7 +48,7 @@ document.getElementById('commStats').appendChild(renderStatStrip([
 ]));
 
 // ---- Join / Member CTA ----
-document.getElementById('joinCta').innerHTML = FDM.components.gateOrCta(
+document.getElementById('joinCta').innerHTML = components.gateOrCta(
   'CREATE_DISCUSSION',
   '<a href="#" class="btn btn-primary">Post in the Community</a>',
   'Sign in to participate'
@@ -42,7 +62,7 @@ document.getElementById('expertAreaChips').append(
 );
 document.getElementById('expertGrid').append(...experts.map(renderUserCard));
 
-FDM.interaction.wireSearchFilter('#expertSearch', '#expertGrid', '.user-card');
+interaction.wireSearchFilter('#expertSearch', '#expertGrid', '.user-card');
 
 // Chip filter on expertise — each expert card carries expertise tags in its visible text content,
 // so wireSearchFilter's text-content fallback handles it (no new data attribute needed).
@@ -58,13 +78,13 @@ document.querySelectorAll('#expertAreaChips .chip').forEach(chip => {
 // ---- Recent activity: top 5 discussions by voteCount ----
 const topDiscs = [...discs].sort((a,b) => b.voteCount - a.voteCount).slice(0, 5);
 document.getElementById('commDiscussions').append(
-  ...topDiscs.map(d => renderDiscussionRow(d, FDM.knowledgeGraph.findUser(d.authorId)))
+  ...topDiscs.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
 );
 
 // ---- Recent questions: latest 4 by createdAt ----
 const recentQs = [...qs].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4);
 document.getElementById('commQuestions').append(
-  ...recentQs.map(q => adaptQuestionForCard(q, FDM.knowledgeGraph.findUser(q.expertId)))
+  ...recentQs.map(q => adaptQuestionForCard(q, knowledgeGraph.findUser(q.expertId)))
 );
 
 // ---- Leaderboard: experts + staff sorted by reputation ----
@@ -72,7 +92,7 @@ const everyone = [...experts, ...staff].sort((a,b) => b.reputation - a.reputatio
 const leaderboardEl = document.getElementById('leaderboardList');
 everyone.forEach((user, i) => {
   const rank = i + 1;
-  const badge = FDM.components.renderRoleBadge(user);
+  const badge = components.renderRoleBadge(user);
   leaderboardEl.insertAdjacentHTML('beforeend', `
     <div class="leaderboard-row">
       <div class="lb-rank ${rank <= 3 ? 'top3' : ''}">${rank}</div>
@@ -84,8 +104,9 @@ everyone.forEach((user, i) => {
         </div>
       </div>
       <div class="lb-rep">
-        <b>${FDM.utils.formatCompactNumber(user.reputation)}</b>
+        <b>${formatCompactNumber(user.reputation)}</b>
         <span>Reputation</span>
       </div>
     </div>`);
 });
+}

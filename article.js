@@ -1,31 +1,41 @@
 /* ============================================================
    ARTICLE.JS — page-specific composition for article.html only.
    Pure orchestration: every render, lookup, permission check and
-   lazy-load strategy is delegated to the matching FDM service,
-   component or renderer. This file only decides WHAT to mount
-   WHERE — never HOW.
+   lazy-load strategy is delegated to the matching service,
+   component or renderer.
    ============================================================ */
-import { renderEventCard, renderStatStrip, renderAuthorCard, renderErrorState, renderEmptyState, renderUserCard, renderTimeline, mountKgPanel, adaptEventForCard, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+import { renderEventCard, renderStatStrip, renderAuthorCard, renderErrorState, renderEmptyState, renderUserCard, mountKgPanel, adaptEventForCard, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+import { renderTimeline } from './timeline.renderer.js';
+import { formatRelativeTime } from './format.js';
+import { navigation } from './navigation.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { tocComponent } from './toc.component.js';
+import { galleryComponent } from './gallery.component.js';
+import { pollComponent } from './poll.component.js';
+import { shareComponent } from './share.component.js';
+import { commentService } from './comment.service.js';
+import { fullCard } from './market.service.js';
+import { staff } from './articles.data.js';
 
+export function initArticle(){
+  const article = knowledgeGraph.findArticle('art-tariff-spreadsheet');
 
-
-const article = FDM.knowledgeGraph.findArticle('art-tariff-spreadsheet');
-
-if(!article){
-  document.getElementById('articleHero').innerHTML = '';
-  document.getElementById('articleHero').appendChild(
-    renderErrorState('This article could not be found.')
-  );
-} else {
-  renderArticlePage(article);
+  if(!article){
+    document.getElementById('articleHero').innerHTML = '';
+    document.getElementById('articleHero').appendChild(
+      renderErrorState('This article could not be found.')
+    );
+  } else {
+    renderArticlePage(article);
+  }
 }
 
 function renderArticlePage(article){
-  const author = (FDM.data.staff || []).find(u => u.id === article.authorId);
-  const editor = (FDM.data.staff || []).find(u => u.id === article.editorId);
+  const author = staff.find(u => u.id === article.authorId);
+  const editor = staff.find(u => u.id === article.editorId);
 
   // ---- Hero ----
-  FDM.navigation.mountBreadcrumbs('articleBreadcrumbs', [
+  navigation.mountBreadcrumbs('articleBreadcrumbs', [
     { label:'Home', href:'index.html' },
     { label:'News', href:'news.html' },
     { label:article.category, href:'news.html' },
@@ -38,8 +48,8 @@ function renderArticlePage(article){
   document.getElementById('articleByline').innerHTML = `
     <span>Edited by ${editor ? editor.nickname : 'the desk'}</span><span class="dot"></span>
     <span>${article.readingTime} min read</span><span class="dot"></span>
-    <span>Published ${FDM.utils.formatRelativeTime(article.publishedAt)}</span><span class="dot"></span>
-    <span>Updated ${FDM.utils.formatRelativeTime(article.updatedAt)}</span>`;
+    <span>Published ${formatRelativeTime(article.publishedAt)}</span><span class="dot"></span>
+    <span>Updated ${formatRelativeTime(article.updatedAt)}</span>`;
   document.getElementById('articleStats').appendChild(renderStatStrip([
     { value:article.viewCount, label:'Views' },
     { value:article.commentCount, label:'Comments' },
@@ -57,7 +67,7 @@ function renderArticlePage(article){
   }
 
   // ---- Table of Contents + reading progress ----
-  FDM.tocComponent.mount('articleToc', article.sections, 'articleBodyContent', 'readingProgress');
+  tocComponent.mount('articleToc', article.sections, 'articleBodyContent', 'readingProgress');
 
   // ---- Citations ----
   const citationsBlock = document.querySelector('.article-citations');
@@ -69,19 +79,19 @@ function renderArticlePage(article){
   }
 
   // ---- Gallery (lazy-mounted by the component itself) ----
-  FDM.galleryComponent.mount('gallerySection', article.galleryImages);
+  galleryComponent.mount('gallerySection', article.galleryImages);
 
   // ---- Poll ----
-  const poll = FDM.knowledgeGraph.findPoll(article.pollId);
-  if(poll) FDM.pollComponent.mount('pollSection', poll);
+  const poll = knowledgeGraph.findPoll(article.pollId);
+  if(poll) pollComponent.mount('pollSection', poll);
 
   // ---- Share / bookmark ----
-  FDM.shareComponent.mount('articleShare', {
+  shareComponent.mount('articleShare', {
     targetType:'article', targetId:article.id, title:article.title, url:window.location.href,
   });
 
   // ---- Sidebar + main-content Knowledge Graph panels ----
-  const related = FDM.knowledgeGraph.getRelatedForArticle(article);
+  const related = knowledgeGraph.getRelatedForArticle(article);
 
   mountKgPanel('kgMarket', '', related.market, fullCard, 'No market indicators linked to this story.');
   mountKgPanel('kgExperts', '', related.experts, renderUserCard, 'No experts linked to this story yet.');
@@ -97,9 +107,9 @@ function renderArticlePage(article){
   }
 
   // ---- Comments (lazy-mounted by the comment service) ----
-  const commentCount = FDM.commentService.getCommentsFor('article', article.id).length;
+  const commentCount = commentService.getCommentsFor('article', article.id).length;
   document.getElementById('commentsHeading').textContent = `Comments (${commentCount})`;
-  FDM.commentService.mountThreadFor('articleComments', 'article', article.id, {
+  commentService.mountThreadFor('articleComments', 'article', article.id, {
     composerPlaceholder:'Add to the discussion… (Markdown supported)',
   });
 

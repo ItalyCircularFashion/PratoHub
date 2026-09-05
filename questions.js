@@ -1,13 +1,33 @@
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { components } from './ui.js';
+import { commentService } from './comment.service.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { staff } from './articles.data.js';
+import { articles } from './articles.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { renderStatStrip, adaptQuestionForCard } from './card.renderer.js';
+
+export function initQuestions(){
 /* ============================================================
    QUESTIONS.JS — page-specific composition for questions.html.
    ============================================================ */
-import { renderStatStrip, adaptQuestionForCard } from './card.renderer.js';
 
 
 
-const questions = FDM.data.questions || [];
+const questions = questions || [];
 
-FDM.navigation.mountBreadcrumbs('qBreadcrumbs', [
+navigation.mountBreadcrumbs('qBreadcrumbs', [
   { label:'Home', href:'index.html' },
   { label:'Questions' },
 ]);
@@ -20,7 +40,7 @@ document.getElementById('qStats').appendChild(renderStatStrip([
   { value: acceptedCount, label:'Accepted' },
 ]));
 
-document.getElementById('askQuestionCta').innerHTML = FDM.components.gateOrCta(
+document.getElementById('askQuestionCta').innerHTML = components.gateOrCta(
   'CREATE_QUESTION', '<a href="#" class="btn btn-primary">Ask a Question</a>', 'Sign in to ask a question'
 );
 
@@ -31,7 +51,7 @@ document.getElementById('qTopics').append(...Object.keys(categoryCounts).map(cat
 ));
 document.getElementById('qCategoryChips').append(...Object.keys(categoryCounts).map(cat => el(`<div class="chip">${cat}</div>`)));
 
-const expertNames = [...new Set(questions.map(q => FDM.knowledgeGraph.findUser(q.expertId)).filter(Boolean).map(e => e.nickname))];
+const expertNames = [...new Set(questions.map(q => knowledgeGraph.findUser(q.expertId)).filter(Boolean).map(e => e.nickname))];
 document.getElementById('qExpertChips').append(
   el('<div class="chip active">All Experts</div>'),
   ...expertNames.map(name => el(`<div class="chip">${name}</div>`))
@@ -39,15 +59,15 @@ document.getElementById('qExpertChips').append(
 
 // ---- Render question cards (model + resolved expert, via the adapter) ----
 document.getElementById('qGridContainer').append(
-  ...questions.map(q => adaptQuestionForCard(q, FDM.knowledgeGraph.findUser(q.expertId)))
+  ...questions.map(q => adaptQuestionForCard(q, knowledgeGraph.findUser(q.expertId)))
 );
 
 // ---- Search, sort, filters — all existing/generalized interaction-service functions ----
-FDM.interaction.wireSearchFilter('#qSearch', '#qGridContainer', '.q-card');
-FDM.interaction.wireChipFilter('#qCategoryChips', '#qGridContainer', '.q-card', 'category');
-FDM.interaction.wireChipFilter('#qDifficultyChips', '#qGridContainer', '.q-card', 'difficulty');
-FDM.interaction.wireChipFilter('#qExpertChips', '#qGridContainer', '.q-card', 'expert');
-FDM.interaction.wireSortSelect('#qSort', '#qGridContainer', {
+interaction.wireSearchFilter('#qSearch', '#qGridContainer', '.q-card');
+interaction.wireChipFilter('#qCategoryChips', '#qGridContainer', '.q-card', 'category');
+interaction.wireChipFilter('#qDifficultyChips', '#qGridContainer', '.q-card', 'difficulty');
+interaction.wireChipFilter('#qExpertChips', '#qGridContainer', '.q-card', 'expert');
+interaction.wireSortSelect('#qSort', '#qGridContainer', {
   votes:   (a,b) => b.dataset.votes   - a.dataset.votes,
   answers: (a,b) => b.dataset.answers - a.dataset.answers,
   newest:  (a,b) => b.dataset.created - a.dataset.created,
@@ -65,3 +85,4 @@ document.querySelectorAll('#qStatusChips .chip').forEach(chip => chip.addEventLi
     card.style.display = show ? '' : 'none';
   });
 }));
+}

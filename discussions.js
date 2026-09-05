@@ -1,38 +1,58 @@
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { components } from './ui.js';
+import { commentService } from './comment.service.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { staff } from './articles.data.js';
+import { articles } from './articles.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { renderDiscussionRow, renderStatStrip, el } from './card.renderer.js';
+
+export function initDiscussions(){
 /* ============================================================
-   DISCUSSIONS.JS — page-specific composition for discussions.html.
+   DISCUSSIONS.JS — page-specific composition for allDiscussions.html.
    Every render, lookup, permission check and interaction wiring
    is delegated to an existing FDM service/component/renderer.
    ============================================================ */
-import { renderDiscussionRow, renderStatStrip } from './card.renderer.js';
 
 
 
-const discussions = FDM.data.discussions || [];
+const allDiscussions = discussions || [];
 
 // ---- Breadcrumbs ----
-FDM.navigation.mountBreadcrumbs('discBreadcrumbs', [
+navigation.mountBreadcrumbs('discBreadcrumbs', [
   { label:'Home', href:'index.html' },
   { label:'Discussions' },
 ]);
 
 // ---- Header stats ----
-const totalReplies = discussions.reduce((sum,d) => sum + d.replyCount, 0);
-const totalVotes = discussions.reduce((sum,d) => sum + d.voteCount, 0);
+const totalReplies = allDiscussions.reduce((sum,d) => sum + d.replyCount, 0);
+const totalVotes = allDiscussions.reduce((sum,d) => sum + d.voteCount, 0);
 document.getElementById('discStats').appendChild(renderStatStrip([
-  { value: discussions.length, label:'Open Threads' },
+  { value: allDiscussions.length, label:'Open Threads' },
   { value: totalReplies, label:'Replies' },
   { value: totalVotes, label:'Votes Cast' },
 ]));
 
 // ---- Create Discussion CTA (permission-gated) ----
-document.getElementById('createDiscussionCta').innerHTML = FDM.components.gateOrCta(
+document.getElementById('createDiscussionCta').innerHTML = components.gateOrCta(
   'CREATE_DISCUSSION',
   '<a href="#" class="btn btn-primary">Start a Discussion</a>',
   'Sign in to start a discussion'
 );
 
 // ---- Categories: derived from the data, not hardcoded ----
-const categoryCounts = discussions.reduce((acc,d) => { acc[d.category] = (acc[d.category]||0)+1; return acc; }, {});
+const categoryCounts = allDiscussions.reduce((acc,d) => { acc[d.category] = (acc[d.category]||0)+1; return acc; }, {});
 const categories = Object.keys(categoryCounts);
 
 document.getElementById('discTopics').append(...categories.map(cat =>
@@ -42,13 +62,13 @@ document.getElementById('discCategoryChips').append(...categories.map(cat => el(
 
 // ---- Render the list (model + resolved author, via the extended renderDiscussionRow) ----
 document.getElementById('discListContainer').append(
-  ...discussions.map(d => renderDiscussionRow(d, FDM.knowledgeGraph.findUser(d.authorId)))
+  ...allDiscussions.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
 );
 
 // ---- Search, sort, category filter — all existing interaction-service functions ----
-FDM.interaction.wireSearchFilter('#discSearch', '#discListContainer', '.disc-row');
-FDM.interaction.wireChipCategoryFilter('#discCategoryChips', '#discListContainer', '.disc-row');
-FDM.interaction.wireSortSelect('#discSort', '#discListContainer', {
+interaction.wireSearchFilter('#discSearch', '#discListContainer', '.disc-row');
+interaction.wireChipCategoryFilter('#discCategoryChips', '#discListContainer', '.disc-row');
+interaction.wireSortSelect('#discSort', '#discListContainer', {
   votes:   (a,b) => b.dataset.votes   - a.dataset.votes,
   replies: (a,b) => b.dataset.replies - a.dataset.replies,
   updated: (a,b) => b.dataset.updated - a.dataset.updated,
@@ -62,7 +82,7 @@ const VIEW_FILTERS = {
   all:       () => true,
   trending:  (row) => Number(row.dataset.votes) >= 150,
   latest:    () => true, // re-sorted below, not filtered
-  following: (row) => FDM.session.isFollowing('discussion', row.querySelector('.follow-toggle')?.dataset.id),
+  following: (row) => session.isFollowing('discussion', row.querySelector('.follow-toggle')?.dataset.id),
   solved:    (row) => row.querySelector('.tag') && row.textContent.includes('Solved'),
 };
 viewChips.forEach(chip => chip.addEventListener('click', () => {
@@ -79,12 +99,13 @@ viewChips.forEach(chip => chip.addEventListener('click', () => {
 document.getElementById('discListContainer').addEventListener('click', (e) => {
   const btn = e.target.closest('.follow-toggle');
   if(!btn) return;
-  const nowFollowing = FDM.session.toggleFollow('discussion', btn.dataset.id);
+  const nowFollowing = session.toggleFollow('discussion', btn.dataset.id);
   btn.textContent = nowFollowing ? 'Following ✓' : '+ Follow';
 });
 document.addEventListener('fdm:authchange', () => {
   document.getElementById('discListContainer').innerHTML = '';
   document.getElementById('discListContainer').append(
-    ...discussions.map(d => renderDiscussionRow(d, FDM.knowledgeGraph.findUser(d.authorId)))
+    ...allDiscussions.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
   );
 });
+}

@@ -784,3 +784,47 @@
   .timeline-date{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--stone); font-weight:600;}
   .timeline-label{font-size:13.5px; color:var(--charcoal); font-weight:600; margin-top:3px;}
   .timeline-note{font-size:12.5px; color:var(--stone); margin-top:3px;}
+
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+/* Skip link - visible only on focus */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 1000;
+  font-size: 14px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus visible styles */
+:focus-visible {
+  outline: 2px solid var(--accent, #0066cc);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Ensure sufficient color contrast */
+@media (prefers-contrast: more) {
+  :root {
+    --text: #000;
+    --bg: #fff;
+  }
+}

@@ -1,12 +1,32 @@
+import { navigation } from './navigation.service.js';
+import { interaction } from './interaction.service.js';
+import { knowledgeGraph } from './knowledge-graph.service.js';
+import { auth } from './auth.js';
+import { session } from './session.service.js';
+import { permissions } from './permissions.js';
+import { components } from './ui.js';
+import { commentService } from './comment.service.js';
+import { discussions } from './discussions.data.js';
+import { questions } from './questions.data.js';
+import { events } from './events.data.js';
+import { experts } from './experts.data.js';
+import { staff } from './articles.data.js';
+import { articles } from './articles.data.js';
+import { comments } from './comments.data.js';
+import { notifications } from './notifications.data.js';
+import { polls } from './polls.data.js';
+import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { renderStatStrip, renderErrorState, renderUserCard, renderCommentItem, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
+
+export function initQuestion(){
 /* ============================================================
    QUESTION.JS — page-specific composition for question.html.
    Mirrors thread.js. Pure orchestration only.
    ============================================================ */
-import { renderStatStrip, renderErrorState, renderUserCard, renderCommentItem, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
 
 
 
-const question = FDM.knowledgeGraph.findQuestion('q-jacquard');
+const question = knowledgeGraph.findQuestion('q-jacquard');
 
 if(!question){
   document.getElementById('qHero').appendChild(renderErrorState('This question could not be found.'));
@@ -15,11 +35,11 @@ if(!question){
 }
 
 function renderQuestionPage(question){
-  const expert = FDM.knowledgeGraph.findUser(question.expertId);
+  const expert = knowledgeGraph.findUser(question.expertId);
   const difficultyLabel = { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced' };
 
   // ---- Breadcrumbs ----
-  FDM.navigation.mountBreadcrumbs('qBreadcrumbs', [
+  navigation.mountBreadcrumbs('qBreadcrumbs', [
     { label:'Home', href:'index.html' },
     { label:'Questions', href:'questions.html' },
     { label:question.category, href:'questions.html' },
@@ -40,10 +60,10 @@ function renderQuestionPage(question){
   document.getElementById('qByline').innerHTML = `
     ${expert ? `<img class="avatar" style="width:28px;height:28px;" src="${expert.avatarUrl}" alt="">
     <span>${expert.nickname}</span>
-    ${FDM.components.renderRoleBadge(expert)}
+    ${components.renderRoleBadge(expert)}
     <span class="dot"></span>` : ''}
-    <span>Asked ${FDM.utils.formatRelativeTime(question.createdAt)}</span>
-    <span class="dot"></span><span>Updated ${FDM.utils.formatRelativeTime(question.updatedAt)}</span>`;
+    <span>Asked ${formatRelativeTime(question.createdAt)}</span>
+    <span class="dot"></span><span>Updated ${formatRelativeTime(question.updatedAt)}</span>`;
 
   // ---- Stats ----
   document.getElementById('qStats').appendChild(renderStatStrip([
@@ -55,7 +75,7 @@ function renderQuestionPage(question){
 
   // ---- Vote + share ----
   function renderQVote(){
-    document.getElementById('qVote').innerHTML = FDM.components.renderVoteControl(question.voteCount, 'question', question.id);
+    document.getElementById('qVote').innerHTML = components.renderVoteControl(question.voteCount, 'question', question.id);
   }
   renderQVote();
   document.addEventListener('fdm:authchange', renderQVote);
@@ -65,13 +85,13 @@ function renderQuestionPage(question){
   });
 
   // ---- Answers: accepted first, then remaining in chronological order ----
-  const allAnswers = FDM.commentService.getCommentsFor('question', question.id);
+  const allAnswers = commentService.getCommentsFor('question', question.id);
   const accepted  = allAnswers.find(c => c.id === question.acceptedAnswerId) || null;
   const rest      = allAnswers.filter(c => c.id !== question.acceptedAnswerId);
 
   // Accepted answer rendered as a standalone highlighted block, then remaining via the thread component.
   if(accepted){
-    const acceptedAuthor = FDM.knowledgeGraph.findUser(accepted.authorId);
+    const acceptedAuthor = knowledgeGraph.findUser(accepted.authorId);
     const node = renderCommentItem(accepted, acceptedAuthor, []);
     node.classList.add('is-pinned');
     const label = document.createElement('div');
@@ -82,17 +102,18 @@ function renderQuestionPage(question){
     document.getElementById('qAcceptedAnswer').appendChild(node);
   }
 
-  FDM.commentService.mountThreadFor('qAnswers', 'question', question.id, {
+  commentService.mountThreadFor('qAnswers', 'question', question.id, {
     composerPlaceholder:'Post an answer… (Markdown supported)',
     emptyMessage:'No additional answers yet.',
     excludeId: question.acceptedAnswerId,
   });
 
   // ---- Sidebar: knowledge graph ----
-  const related = FDM.knowledgeGraph.getRelatedForQuestion(question);
+  const related = knowledgeGraph.getRelatedForQuestion(question);
 
   mountKgPanel('qExpert', '', expert ? [expert] : [], renderUserCard, 'No expert linked to this question.');
   mountKgPanel('qRelatedQuestions', '', related.questions, renderKgQuestionItem, 'No similar questions yet.');
   mountKgPanel('qRelatedDiscussions', '', related.discussions, renderKgDiscussionItem, 'No related discussions yet.');
   mountKgPanel('qRelatedArticles', '', related.articles, renderArticleAsNewsCard, 'No related articles yet.');
+}
 }

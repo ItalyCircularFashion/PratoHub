@@ -1,6 +1,6 @@
 /* ============================================================
    PERMISSION-AWARE UI COMPONENTS
-   assets/components/ui.js
+   components/ui.js
 
    Every page includes this file and gets, for free:
    - an auth-state nav (Sign In/Join for guests, avatar+role
@@ -17,142 +17,140 @@
    Re-runs automatically on 'fdm:authchange', so switching the
    mock user re-renders every gated element on the page.
    ============================================================ */
-// Safe guard: check if required services exist
-  if(!permissions || !auth){
-    console.warn('ui.js: Required FDM.permissions and FDM.auth must be loaded first');
-    return;
-  }
+import { auth } from './auth.js';
+import { permissions } from './permissions.js';
+import { session } from './session.service.js';
+import { notifications } from './notifications.data.js';
 
-  const { can, isAtLeast, label, ROLES } = permissions;
+const { can, isAtLeast, label, ROLES } = permissions;
 
-  /** Small role-badge chip, reused by the nav and (later) by comment/byline UI. */
-  function renderRoleBadge(user){
-    if(!user || user.role === ROLES.GUEST) return '';
-    const cls = 'role-badge role-badge--' + user.role;
-    return `<span class="${cls}">${label(user.role)}</span>`;
-  }
+/** Small role-badge chip, reused by the nav and (later) by comment/byline UI. */
+function renderRoleBadge(user){
+  if(!user || user.role === ROLES.GUEST) return '';
+  const cls = 'role-badge role-badge--' + user.role;
+  return `<span class="${cls}">${label(user.role)}</span>`;
+}
 
-  /** Renders the #authNav mount point: Guest CTA vs signed-in identity. */
-  function renderAuthNav(){
-    const user = FDM.auth.getCurrentUser();
-    if(!user){
-      return `
-        <a href="login.html" class="auth-link">Sign In</a>
-        <a href="register.html" class="btn btn-primary">Join the Community</a>`;
-    }
-    const unread = (FDM.data && FDM.data.notifications || []).filter(n => n.userId === user.id && !n.isRead).length;
+/** Renders the #authNav mount point: Guest CTA vs signed-in identity. */
+function renderAuthNav(){
+  const user = auth.getCurrentUser();
+  if(!user){
     return `
-      <a href="notifications.html" class="auth-bell" aria-label="Notifications, ${unread} unread">
-        🔔${unread ? '<span class="auth-bell-dot"></span>' : ''}
-      </a>
-      <a href="profile.html" class="auth-user">
-        <img class="avatar" src="${user.avatarUrl}" alt="">
-        <span class="auth-user-name">${user.nickname}</span>
-        ${renderRoleBadge(user)}
-      </a>`;
+      <a href="login.html" class="auth-link">Sign In</a>
+      <a href="register.html" class="btn btn-primary">Join the Community</a>`;
   }
-  function mountAuthNav(){
-    const el = document.getElementById('authNav');
-    if(!el) return;
-    el.innerHTML = renderAuthNav();
-  }
+  const unread = notifications.filter(n => n.userId === user.id && !n.isRead).length;
+  return `
+    <a href="notifications.html" class="auth-bell" aria-label="Notifications, ${unread} unread">
+      🔔${unread ? '<span class="auth-bell-dot"></span>' : ''}
+    </a>
+    <a href="profile.html" class="auth-user">
+      <img class="avatar" src="${user.avatarUrl}" alt="">
+      <span class="auth-user-name">${user.nickname}</span>
+      ${renderRoleBadge(user)}
+    </a>`;
+}
 
-  /**
-   * Generic gate: returns true if `node`'s data-require-* attributes
-   * allow it to be shown for the current user.
-   */
-  function isVisibleFor(node, user){
-    if(node.hasAttribute('data-require-guest')) return !user;
-    const cap = node.getAttribute('data-require-capability');
-    if(cap) return can(user, cap);
-    const role = node.getAttribute('data-require-role');
-    if(role) return isAtLeast(user, role);
-    return true;
-  }
+function mountAuthNav(){
+  const el = document.getElementById('authNav');
+  if(!el) return;
+  el.innerHTML = renderAuthNav();
+}
 
-  /** Sweeps every gated element on the page and shows/hides it for the current user. */
-  function applyPermissionVisibility(){
-    const user = FDM.auth.getCurrentUser();
-    document.querySelectorAll('[data-require-capability], [data-require-role], [data-require-guest]')
-      .forEach(node => {
-        const visible = isVisibleFor(node, user);
-        node.style.display = visible ? '' : 'none';
-      });
-  }
+/**
+ * Generic gate: returns true if `node`'s data-require-* attributes
+ * allow it to be shown for the current user.
+ */
+function isVisibleFor(node, user){
+  if(node.hasAttribute('data-require-guest')) return !user;
+  const cap = node.getAttribute('data-require-capability');
+  if(cap) return can(user, cap);
+  const role = node.getAttribute('data-require-role');
+  if(role) return isAtLeast(user, role);
+  return true;
+}
 
-  /**
-   * Generic permission-gated control: shows the real control when the
-   * user has `capability`, otherwise shows a "Sign in to participate"
-   * CTA. Used by the comment composer, vote control, etc.
-   * @param {string} capability
-   * @param {string} controlHtml
-   * @param {string} [ctaLabel]
-   */
-  function gateOrCta(capability, controlHtml, ctaLabel){
-    const user = FDM.auth.getCurrentUser();
-    if(can(user, capability)) return controlHtml;
-    return `<a class="signin-cta" href="login.html">${ctaLabel || 'Sign in to participate'}</a>`;
-  }
-
-  /** Reusable comment/answer composer — gated behind COMMENT capability. */
-  function renderCommentComposer(placeholder){
-    return gateOrCta('COMMENT', `
-      <form class="composer">
-        <textarea class="composer-input" rows="3" placeholder="${placeholder || 'Share your perspective… (Markdown supported)'}"></textarea>
-        <div class="composer-actions">
-          <span class="composer-hint">Markdown · @mentions · attachments</span>
-          <button type="submit" class="btn btn-primary">Post</button>
-        </div>
-      </form>`, 'Sign in to comment');
-  }
-
-  /** Reusable vote control — gated behind VOTE capability (read-only count for guests). Wired by FDM.interaction.initVoteControls(). */
-  function renderVoteControl(count, targetType, targetId){
-    const user = FDM.auth.getCurrentUser();
-    const enabled = can(user, 'VOTE');
-    const voteState = (targetType && targetId && FDM.session) ? FDM.session.getVoteState(targetType, targetId) : null;
-    return `
-      <div class="vote-control ${enabled ? '' : 'is-disabled'}" data-target-type="${targetType||''}" data-target-id="${targetId||''}">
-        <button class="vote-btn ${voteState==='up'?'is-active':''}" data-dir="up" ${enabled ? '' : 'disabled title="Sign in to vote"'}>▲</button>
-        <span class="vote-count">${count}</span>
-        <button class="vote-btn ${voteState==='down'?'is-active':''}" data-dir="down" ${enabled ? '' : 'disabled title="Sign in to vote"'}>▼</button>
-      </div>`;
-  }
-
-  /** Dev-only "Preview as" switcher — lets every role's UI be exercised before real auth ships. */
-  function mountRoleSwitcher(){
-    if(document.getElementById('devRoleSwitcher')) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'dev-role-switcher';
-    wrap.id = 'devRoleSwitcher';
-    wrap.innerHTML = `
-      <span class="drs-label">Preview as</span>
-      <select id="devRoleSelect" aria-label="Preview as role">
-        <option value="guest">Guest</option>
-        <option value="member">Member</option>
-        <option value="expert">Verified Expert</option>
-        <option value="moderator">Moderator</option>
-        <option value="admin">Administrator</option>
-      </select>`;
-    document.body.appendChild(wrap);
-    wrap.querySelector('select').addEventListener('change', (e) => {
-      FDM.auth.setMockUser(e.target.value);
+/** Sweeps every gated element on the page and shows/hides it for the current user. */
+function applyPermissionVisibility(){
+  const user = auth.getCurrentUser();
+  document.querySelectorAll('[data-require-capability], [data-require-role], [data-require-guest]')
+    .forEach(node => {
+      const visible = isVisibleFor(node, user);
+      node.style.display = visible ? '' : 'none';
     });
-  }
+}
 
-  document.addEventListener('fdm:authchange', () => {
-    mountAuthNav();
-    applyPermissionVisibility();
+/**
+ * Generic permission-gated control: shows the real control when the
+ * user has `capability`, otherwise shows a "Sign in to participate"
+ * CTA. Used by the comment composer, vote control, etc.
+ * @param {string} capability
+ * @param {string} controlHtml
+ * @param {string} [ctaLabel]
+ */
+function gateOrCta(capability, controlHtml, ctaLabel){
+  const user = auth.getCurrentUser();
+  if(can(user, capability)) return controlHtml;
+  return `<a class="signin-cta" href="login.html">${ctaLabel || 'Sign in to participate'}</a>`;
+}
+
+/** Reusable comment/answer composer — gated behind COMMENT capability. */
+function renderCommentComposer(placeholder){
+  return gateOrCta('COMMENT', `
+    <form class="composer">
+      <textarea class="composer-input" rows="3" placeholder="${placeholder || 'Share your perspective… (Markdown supported)'}"></textarea>
+      <div class="composer-actions">
+        <span class="composer-hint">Markdown · @mentions · attachments</span>
+        <button type="submit" class="btn btn-primary">Post</button>
+      </div>
+    </form>`, 'Sign in to comment');
+}
+
+/** Reusable vote control — gated behind VOTE capability (read-only count for guests). */
+function renderVoteControl(count, targetType, targetId){
+  const user = auth.getCurrentUser();
+  const enabled = can(user, 'VOTE');
+  const voteState = (targetType && targetId) ? session.getVoteState(targetType, targetId) : null;
+  return `
+    <div class="vote-control ${enabled ? '' : 'is-disabled'}" data-target-type="${targetType||''}" data-target-id="${targetId||''}">
+      <button class="vote-btn ${voteState==='up'?'is-active':''}" data-dir="up" ${enabled ? '' : 'disabled title="Sign in to vote"'}>▲</button>
+      <span class="vote-count">${count}</span>
+      <button class="vote-btn ${voteState==='down'?'is-active':''}" data-dir="down" ${enabled ? '' : 'disabled title="Sign in to vote"'}>▼</button>
+    </div>`;
+}
+
+/** Dev-only "Preview as" switcher — lets every role's UI be exercised before real auth ships. */
+function mountRoleSwitcher(){
+  if(document.getElementById('devRoleSwitcher')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'dev-role-switcher';
+  wrap.id = 'devRoleSwitcher';
+  wrap.innerHTML = `
+    <span class="drs-label">Preview as</span>
+    <select id="devRoleSelect" aria-label="Preview as role">
+      <option value="guest">Guest</option>
+      <option value="member">Member</option>
+      <option value="expert">Verified Expert</option>
+      <option value="moderator">Moderator</option>
+      <option value="admin">Administrator</option>
+    </select>`;
+  document.body.appendChild(wrap);
+  wrap.querySelector('select').addEventListener('change', (e) => {
+    auth.setMockUser(e.target.value);
   });
+}
 
+document.addEventListener('fdm:authchange', () => {
   mountAuthNav();
   applyPermissionVisibility();
-  mountRoleSwitcher();
+});
 
-  export const components = {
-    renderRoleBadge, renderAuthNav, mountAuthNav,
-    applyPermissionVisibility, gateOrCta,
-    renderCommentComposer, renderVoteControl, mountRoleSwitcher,
-  };
+mountAuthNav();
+applyPermissionVisibility();
+mountRoleSwitcher();
 
-})();
+export const components = {
+  renderRoleBadge, renderAuthNav, mountAuthNav,
+  applyPermissionVisibility, gateOrCta,
+  renderCommentComposer, renderVoteControl, mountRoleSwitcher,
+};

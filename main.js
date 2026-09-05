@@ -1,52 +1,13 @@
 /* ============================================================
    MAIN.JS — Single entry point for all pages
-   Imports and initializes all modules in the correct order.
+   Detects current page and runs appropriate initialization.
    ============================================================ */
 
-// Import models
-import { createUser } from './user.model.js';
-import { createDiscussion } from './discussion.model.js';
-import { createArticle } from './article.model.js';
-import { createComment } from './comment.model.js';
-import { createNotification } from './notification.model.js';
-import { createVote } from './vote.model.js';
-import { createCategory } from './category.model.js';
-import { createQuestion } from './question.model.js';
-import { createPoll } from './poll.model.js';
-import { createCompany } from './company.model.js';
-
-// Import utils
-import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
-import { validateEmail, validateNickname, validatePassword, validateRequired } from './validation.js';
-
-// Import data
-import { articles, staff } from './articles.data.js';
-import { discussions } from './discussions.data.js';
-import { questions } from './questions.data.js';
-import { events } from './events.data.js';
-import { experts } from './experts.data.js';
-import { comments } from './comments.data.js';
-import { notifications } from './notifications.data.js';
-import { polls } from './polls.data.js';
-
-// Import services
-import { permissions, ROLES } from './permissions.js';
-import { auth } from './auth.js';
-import { session } from './session.service.js';
-import { market, commodities, fullCard, compactCard, mountMarketTickers, mountMarketGrid } from './market.service.js';
+// Import all services (they auto-initialize on import)
 import { navigation } from './navigation.service.js';
 import { interaction } from './interaction.service.js';
-import { commentService } from './comment.service.js';
-import { knowledgeGraph } from './knowledge-graph.service.js';
-
-// Import components
+import { mountMarketTickers, mountMarketGrid } from './market.service.js';
 import { components } from './ui.js';
-import { commentComponent } from './comment.component.js';
-import { galleryComponent } from './gallery.component.js';
-import { pollComponent } from './poll.component.js';
-import { shareComponent } from './share.component.js';
-import { moderationComponent } from './moderation.component.js';
-import { tocComponent } from './toc.component.js';
 
 // Import renderers
 import {
@@ -57,23 +18,45 @@ import {
   mountKgPanel, adaptQuestionForCard, renderKgDiscussionItem, renderKgQuestionItem,
   adaptEventForCard, renderArticleAsNewsCard,
 } from './card.renderer.js';
-import { renderTimeline } from './timeline.renderer.js';
 
-// Initialize services that auto-run
-navigation.initHeaderScroll();
-navigation.initFolioRail();
-interaction.initReveal();
-interaction.initChipFilters();
-interaction.initNewsletterForm();
-interaction.initPagination();
-interaction.initSearchBars();
-interaction.initVoteControls();
-mountMarketTickers();
+// Import page-specific modules
+import { initHome } from './home.js';
+import { initNews } from './news.js';
+import { initDiscussions } from './discussions.js';
+import { initQuestions } from './questions.js';
+import { initEvents } from './events.js';
+import { initCommunity } from './community.js';
+import { initThread } from './thread.js';
+import { initQuestion } from './question.js';
+import { initArticle } from './article.js';
 
-// Initialize UI components
+// Initialize shared components
 components.mountAuthNav();
 components.applyPermissionVisibility();
 components.mountRoleSwitcher();
 
+// Detect current page and initialize
+const path = window.location.pathname;
+
+if (path.endsWith('/index.html') || path.endsWith('/') || path.endsWith('/PratoHub/') || path.endsWith('/PratoHub/index.html')) {
+  initHome();
+} else if (path.endsWith('/news.html')) {
+  initNews();
+} else if (path.endsWith('/discussions.html')) {
+  initDiscussions();
+} else if (path.endsWith('/questions.html')) {
+  initQuestions();
+} else if (path.endsWith('/events.html')) {
+  initEvents();
+} else if (path.endsWith('/community.html')) {
+  initCommunity();
+} else if (path.endsWith('/thread.html')) {
+  initThread();
+} else if (path.endsWith('/question.html')) {
+  initQuestion();
+} else if (path.endsWith('/article.html')) {
+  initArticle();
+}
+
 // Log initialization
-console.log('Forum della Moda: all modules initialized');
+console.log('Forum della Moda: initialized for', path);
