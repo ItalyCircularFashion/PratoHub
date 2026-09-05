@@ -1,30 +1,17 @@
 import { navigation } from './navigation.service.js';
-import { interaction } from './interaction.service.js';
 import { knowledgeGraph } from './knowledge-graph.service.js';
-import { auth } from './auth.js';
-import { session } from './session.service.js';
-import { permissions } from './permissions.js';
 import { components } from './ui.js';
 import { commentService } from './comment.service.js';
-import { discussions } from './discussions.data.js';
-import { questions } from './questions.data.js';
-import { events } from './events.data.js';
-import { experts } from './experts.data.js';
-import { staff } from './articles.data.js';
-import { articles } from './articles.data.js';
-import { comments } from './comments.data.js';
-import { notifications } from './notifications.data.js';
-import { polls } from './polls.data.js';
-import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { shareComponent } from './share.component.js';
+import { formatRelativeTime } from './format.js';
 import { renderStatStrip, renderErrorState, renderUserCard, renderCommentItem, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
 
-export function initQuestion(){
 /* ============================================================
    QUESTION.JS — page-specific composition for question.html.
    Mirrors thread.js. Pure orchestration only.
    ============================================================ */
 
-
+export function initQuestion(){
 
 const question = knowledgeGraph.findQuestion('q-jacquard');
 
@@ -80,7 +67,7 @@ function renderQuestionPage(question){
   renderQVote();
   document.addEventListener('fdm:authchange', renderQVote);
 
-  FDM.shareComponent.mount('qShare', {
+  shareComponent.mount('qShare', {
     targetType:'question', targetId:question.id, title:question.title, url:window.location.href,
   });
 
@@ -116,4 +103,5 @@ function renderQuestionPage(question){
   mountKgPanel('qRelatedDiscussions', '', related.discussions, renderKgDiscussionItem, 'No related discussions yet.');
   mountKgPanel('qRelatedArticles', '', related.articles, renderArticleAsNewsCard, 'No related articles yet.');
 }
+
 }

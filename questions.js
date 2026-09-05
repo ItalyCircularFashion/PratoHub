@@ -1,41 +1,29 @@
 import { navigation } from './navigation.service.js';
 import { interaction } from './interaction.service.js';
 import { knowledgeGraph } from './knowledge-graph.service.js';
-import { auth } from './auth.js';
-import { session } from './session.service.js';
-import { permissions } from './permissions.js';
 import { components } from './ui.js';
-import { commentService } from './comment.service.js';
-import { discussions } from './discussions.data.js';
 import { questions } from './questions.data.js';
-import { events } from './events.data.js';
-import { experts } from './experts.data.js';
-import { staff } from './articles.data.js';
-import { articles } from './articles.data.js';
-import { comments } from './comments.data.js';
-import { notifications } from './notifications.data.js';
-import { polls } from './polls.data.js';
-import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
 import { renderStatStrip, adaptQuestionForCard } from './card.renderer.js';
 
-export function initQuestions(){
 /* ============================================================
    QUESTIONS.JS — page-specific composition for questions.html.
    ============================================================ */
 
+function el(h){ const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; }
 
+const questionsData = questions || [];
 
-const questions = questions || [];
+export function initQuestions(){
 
 navigation.mountBreadcrumbs('qBreadcrumbs', [
   { label:'Home', href:'index.html' },
   { label:'Questions' },
 ]);
 
-const totalAnswers = questions.reduce((sum,q) => sum + q.answerCount, 0);
-const acceptedCount = questions.filter(q => q.accepted).length;
+const totalAnswers = questionsData.reduce((sum,q) => sum + q.answerCount, 0);
+const acceptedCount = questionsData.filter(q => q.accepted).length;
 document.getElementById('qStats').appendChild(renderStatStrip([
-  { value: questions.length, label:'Open Questions' },
+  { value: questionsData.length, label:'Open Questions' },
   { value: totalAnswers, label:'Answers' },
   { value: acceptedCount, label:'Accepted' },
 ]));
@@ -45,13 +33,13 @@ document.getElementById('askQuestionCta').innerHTML = components.gateOrCta(
 );
 
 // ---- Categories + experts: derived from data ----
-const categoryCounts = questions.reduce((acc,q) => { acc[q.category] = (acc[q.category]||0)+1; return acc; }, {});
+const categoryCounts = questionsData.reduce((acc,q) => { acc[q.category] = (acc[q.category]||0)+1; return acc; }, {});
 document.getElementById('qTopics').append(...Object.keys(categoryCounts).map(cat =>
   el(`<a href="#" class="topic-pill">${cat} <span class="count">${categoryCounts[cat]}</span></a>`)
 ));
 document.getElementById('qCategoryChips').append(...Object.keys(categoryCounts).map(cat => el(`<div class="chip">${cat}</div>`)));
 
-const expertNames = [...new Set(questions.map(q => knowledgeGraph.findUser(q.expertId)).filter(Boolean).map(e => e.nickname))];
+const expertNames = [...new Set(questionsData.map(q => knowledgeGraph.findUser(q.expertId)).filter(Boolean).map(e => e.nickname))];
 document.getElementById('qExpertChips').append(
   el('<div class="chip active">All Experts</div>'),
   ...expertNames.map(name => el(`<div class="chip">${name}</div>`))
@@ -59,7 +47,7 @@ document.getElementById('qExpertChips').append(
 
 // ---- Render question cards (model + resolved expert, via the adapter) ----
 document.getElementById('qGridContainer').append(
-  ...questions.map(q => adaptQuestionForCard(q, knowledgeGraph.findUser(q.expertId)))
+  ...questionsData.map(q => adaptQuestionForCard(q, knowledgeGraph.findUser(q.expertId)))
 );
 
 // ---- Search, sort, filters — all existing/generalized interaction-service functions ----
@@ -85,4 +73,5 @@ document.querySelectorAll('#qStatusChips .chip').forEach(chip => chip.addEventLi
     card.style.display = show ? '' : 'none';
   });
 }));
+
 }

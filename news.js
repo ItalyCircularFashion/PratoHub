@@ -1,6 +1,6 @@
 import { renderAgendaCard, renderNewsCard, renderPick, renderArticleAsNewsCard } from './card.renderer.js';
 import { articles } from './articles.data.js';
-import { wireSearchFilter } from './interaction.service.js';
+import { interaction } from './interaction.service.js';
 
 /* ============================================================
    NEWS.JS — page-specific data + wiring for news.html only.
@@ -48,5 +48,5 @@ export function initNews(){
   document.getElementById('trendingRail').append(...trending.map(renderAgendaCard));
   document.getElementById('interviewsRail').append(...interviews.map(renderAgendaCard));
   document.getElementById('picksStrip').append(...picks.map(renderPick));
-  wireSearchFilter('#newsSearch', '#newsGrid', '.news-card');
+  interaction.wireSearchFilter('#newsSearch', '#newsGrid', '.news-card');
 }

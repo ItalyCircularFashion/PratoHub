@@ -1,33 +1,22 @@
 import { navigation } from './navigation.service.js';
 import { interaction } from './interaction.service.js';
 import { knowledgeGraph } from './knowledge-graph.service.js';
-import { auth } from './auth.js';
 import { session } from './session.service.js';
-import { permissions } from './permissions.js';
 import { components } from './ui.js';
-import { commentService } from './comment.service.js';
 import { discussions } from './discussions.data.js';
-import { questions } from './questions.data.js';
-import { events } from './events.data.js';
-import { experts } from './experts.data.js';
-import { staff } from './articles.data.js';
-import { articles } from './articles.data.js';
-import { comments } from './comments.data.js';
-import { notifications } from './notifications.data.js';
-import { polls } from './polls.data.js';
-import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
-import { renderDiscussionRow, renderStatStrip, el } from './card.renderer.js';
+import { renderDiscussionRow, renderStatStrip } from './card.renderer.js';
 
-export function initDiscussions(){
 /* ============================================================
-   DISCUSSIONS.JS — page-specific composition for allDiscussions.html.
+   DISCUSSIONS.JS — page-specific composition for discussions.html.
    Every render, lookup, permission check and interaction wiring
    is delegated to an existing FDM service/component/renderer.
    ============================================================ */
 
+function el(h){ const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; }
 
+const discussionsData = discussions || [];
 
-const allDiscussions = discussions || [];
+export function initDiscussions(){
 
 // ---- Breadcrumbs ----
 navigation.mountBreadcrumbs('discBreadcrumbs', [
@@ -36,10 +25,10 @@ navigation.mountBreadcrumbs('discBreadcrumbs', [
 ]);
 
 // ---- Header stats ----
-const totalReplies = allDiscussions.reduce((sum,d) => sum + d.replyCount, 0);
-const totalVotes = allDiscussions.reduce((sum,d) => sum + d.voteCount, 0);
+const totalReplies = discussionsData.reduce((sum,d) => sum + d.replyCount, 0);
+const totalVotes = discussionsData.reduce((sum,d) => sum + d.voteCount, 0);
 document.getElementById('discStats').appendChild(renderStatStrip([
-  { value: allDiscussions.length, label:'Open Threads' },
+  { value: discussionsData.length, label:'Open Threads' },
   { value: totalReplies, label:'Replies' },
   { value: totalVotes, label:'Votes Cast' },
 ]));
@@ -52,7 +41,7 @@ document.getElementById('createDiscussionCta').innerHTML = components.gateOrCta(
 );
 
 // ---- Categories: derived from the data, not hardcoded ----
-const categoryCounts = allDiscussions.reduce((acc,d) => { acc[d.category] = (acc[d.category]||0)+1; return acc; }, {});
+const categoryCounts = discussionsData.reduce((acc,d) => { acc[d.category] = (acc[d.category]||0)+1; return acc; }, {});
 const categories = Object.keys(categoryCounts);
 
 document.getElementById('discTopics').append(...categories.map(cat =>
@@ -62,7 +51,7 @@ document.getElementById('discCategoryChips').append(...categories.map(cat => el(
 
 // ---- Render the list (model + resolved author, via the extended renderDiscussionRow) ----
 document.getElementById('discListContainer').append(
-  ...allDiscussions.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
+  ...discussionsData.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
 );
 
 // ---- Search, sort, category filter — all existing interaction-service functions ----
@@ -105,7 +94,8 @@ document.getElementById('discListContainer').addEventListener('click', (e) => {
 document.addEventListener('fdm:authchange', () => {
   document.getElementById('discListContainer').innerHTML = '';
   document.getElementById('discListContainer').append(
-    ...allDiscussions.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
+    ...discussionsData.map(d => renderDiscussionRow(d, knowledgeGraph.findUser(d.authorId)))
   );
 });
+
 }

@@ -1,29 +1,17 @@
 import { navigation } from './navigation.service.js';
-import { interaction } from './interaction.service.js';
 import { knowledgeGraph } from './knowledge-graph.service.js';
-import { auth } from './auth.js';
-import { session } from './session.service.js';
-import { permissions } from './permissions.js';
 import { components } from './ui.js';
 import { commentService } from './comment.service.js';
-import { discussions } from './discussions.data.js';
-import { questions } from './questions.data.js';
-import { events } from './events.data.js';
-import { experts } from './experts.data.js';
-import { staff } from './articles.data.js';
-import { articles } from './articles.data.js';
-import { comments } from './comments.data.js';
-import { notifications } from './notifications.data.js';
-import { polls } from './polls.data.js';
-import { formatRelativeTime, formatDate, formatCompactNumber } from './format.js';
+import { shareComponent } from './share.component.js';
+import { moderationComponent } from './moderation.component.js';
+import { formatRelativeTime } from './format.js';
 import { renderStatStrip, renderErrorState, renderUserCard, mountKgPanel, renderKgDiscussionItem, renderKgQuestionItem, renderArticleAsNewsCard } from './card.renderer.js';
 
-export function initThread(){
 /* ============================================================
    THREAD.JS — page-specific composition for thread.html only.
    ============================================================ */
 
-
+export function initThread(){
 
 const discussion = knowledgeGraph.findDiscussion('disc-erp');
 
@@ -66,12 +54,12 @@ function renderThreadPage(discussion){
 
   document.getElementById('threadOpVote').innerHTML = components.renderVoteControl(discussion.voteCount, 'discussion', discussion.id);
 
-  FDM.shareComponent.mount('threadShare', {
+  shareComponent.mount('threadShare', {
     targetType:'discussion', targetId:discussion.id, title:discussion.title, url:window.location.href,
   });
 
   // ---- Moderation toolbar (renders nothing for non-moderators) ----
-  FDM.moderationComponent.mountToolbar('threadModeration', discussion);
+  moderationComponent.mountToolbar('threadModeration', discussion);
 
   // ---- Comments: nested replies, voting, accepted answer, expert/mod/admin badges ----
   const commentCount = commentService.getCommentsFor('discussion', discussion.id).length;
@@ -87,4 +75,5 @@ function renderThreadPage(discussion){
   mountKgPanel('threadQuestions', '', related.questions, renderKgQuestionItem, 'No related questions yet.');
   mountKgPanel('threadArticles', '', related.articles, renderArticleAsNewsCard, 'No related articles yet.');
 }
+
 }
