@@ -73,6 +73,6 @@ window.FDM = window.FDM || {};
     login(MOCK_USERS[key] || null);
   }
 
-  FDM.auth = { getCurrentUser, isAuthenticated, login, logout, setMockUser, MOCK_USERS };
+  FDM.auth = { getCurrentUser, isAuthenticated, login, logout, setMockUser, setCurrentUser: login, MOCK_USERS };
 
 })();

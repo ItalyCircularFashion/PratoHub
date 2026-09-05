@@ -1,8 +1,8 @@
 /* ============================================================
    HOME.JS — page-specific data + wiring for index.html only.
    All rendering logic, market engine and site-wide behaviours
-   live in main.js and are already initialised by the time this
-   file runs.
+   live in card.renderer.js + services/ and are already
+   initialised by the time this file runs.
    ============================================================ */
 
 const agenda = [
@@ -52,7 +52,9 @@ document.getElementById('discList').append(...discussions.map(renderDiscussionRo
 document.getElementById('qGrid').append(...questions.map(renderQuestionCard));
 document.getElementById('eventsRail').append(...events.map(renderEventCard));
 document.getElementById('picksStrip').append(...picks.map(renderPick));
-mountMarketGrid('marketGrid', commodities);
+
+// FIX: commodities comes from FDM.market (market.service.js)
+mountMarketGrid('marketGrid', FDM.market.commodities);
 
 // ---- Subtle parallax on the contained hero image (homepage hero only) ----
 const heroEl = document.getElementById('hero');
