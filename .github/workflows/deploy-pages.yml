@@ -1,0 +1,70 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Jobs opt into only the permissions they need.
+permissions: {}
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Manual runs from other refs must not publish an unreviewed branch.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck frontend
+        run: npm run typecheck --workspace @pratohub/web
+      - name: Run frontend tests
+        run: npm run test --workspace @pratohub/web
+      - name: Lint application
+        run: npm run lint
+      - name: Build frontend for the Pages base path
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build --workspace @pratohub/web -- --emptyOutDir --base "${PAGES_BASE_PATH}/"
+      - name: Scan public build
+        run: node scripts/check-public-build.mjs
+      - name: Install browser for end-to-end tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ./.playwright-browsers
+        run: npx playwright install chromium --only-shell --with-deps
+      - name: Test built frontend navigation and responsive flows
+        run: npm run test:e2e
+      - name: Upload only the scanned frontend
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

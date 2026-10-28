@@ -1,0 +1,5 @@
+import type { ReactNode } from 'react';
+export function Link({ to, children, className }: { to: string; children: ReactNode; className?: string }) { return <a className={className} href={`#${to}`}>{children}</a>; }
+export function PageHero({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) { return <section className="page-hero"><div className="container"><p className="eyebrow">{eyebrow}</p><h1>{title}<span>.</span></h1><p>{copy}</p></div></section>; }
+export function SectionHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) { return <div className="section-head"><div><p className="eyebrow">{eyebrow}</p><h2 className="section-title">{title}</h2></div>{copy && <p className="section-copy">{copy}</p>}</div>; }
+export function NotFound({ message = 'Questa pagina non esiste o non è disponibile.' }: { message?: string }) { return <section className="section container not-found"><p className="eyebrow">PAGINA NON DISPONIBILE</p><h1>Non abbiamo trovato<br/>questa pagina<span>.</span></h1><p>{message}</p><Link className="button button-primary" to="/">Torna alla homepage ↗</Link></section>; }
