@@ -1,0 +1,296 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model assertion_sources {
+  assertion_id      String          @db.Uuid
+  source_id         String          @db.Uuid
+  supporting_detail String?
+  fact_assertions   fact_assertions @relation(fields: [assertion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sources           sources         @relation(fields: [source_id], references: [id], onUpdate: NoAction)
+
+  @@id([assertion_id, source_id])
+}
+
+model ateco_codes {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version             String
+  code                String
+  label_it            String
+  company_ateco_codes company_ateco_codes[]
+
+  @@unique([version, code])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model audit_events {
+  id           BigInt   @id @default(autoincrement())
+  occurred_at  DateTime @default(now()) @db.Timestamptz(6)
+  actor        String
+  entity_kind  String
+  entity_id    String   @db.Uuid
+  action       String
+  before_jsonb Json?
+  after_jsonb  Json?
+
+  @@index([entity_kind, entity_id, occurred_at(sort: Desc)], map: "ix_audit_entity")
+}
+
+model capability_materials {
+  capability_id        String               @db.Uuid
+  material_id          String               @db.Uuid
+  company_capabilities company_capabilities @relation(fields: [capability_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  materials            materials            @relation(fields: [material_id], references: [id], onUpdate: NoAction)
+
+  @@id([capability_id, material_id])
+}
+
+model capability_technologies {
+  capability_id        String               @db.Uuid
+  technology_id        String               @db.Uuid
+  company_capabilities company_capabilities @relation(fields: [capability_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  technologies         technologies         @relation(fields: [technology_id], references: [id], onUpdate: NoAction)
+
+  @@id([capability_id, technology_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model companies {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                 String                 @unique
+  legal_name           String
+  trade_name           String?
+  vat_number           String?
+  tax_code             String?
+  country_code         String                 @default("IT") @db.Char(2)
+  website_url          String?
+  summary              String?
+  publication_status   publication_status     @default(DRAFT)
+  claim_status         claim_status           @default(UNCLAIMED)
+  published_at         DateTime?              @db.Timestamptz(6)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
+  company_ateco_codes  company_ateco_codes[]
+  company_capabilities company_capabilities[]
+  company_contacts     company_contacts[]
+  company_roles        company_roles[]
+  company_sites        company_sites[]
+  fact_assertions      fact_assertions[]
+
+  @@index([publication_status], map: "ix_company_status")
+}
+
+model company_ateco_codes {
+  company_id    String      @db.Uuid
+  ateco_code_id String      @db.Uuid
+  is_primary    Boolean     @default(false)
+  ateco_codes   ateco_codes @relation(fields: [ateco_code_id], references: [id], onUpdate: NoAction)
+  companies     companies   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([company_id, ateco_code_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model company_capabilities {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id              String                    @db.Uuid
+  taxonomy_node_id        String                    @db.Uuid
+  site_id                 String?                   @db.Uuid
+  execution_mode          execution_mode            @default(UNKNOWN)
+  b2b_availability        b2b_availability          @default(UNKNOWN)
+  description             String?
+  publication_status      publication_status        @default(DRAFT)
+  published_at            DateTime?                 @db.Timestamptz(6)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  capability_materials    capability_materials[]
+  capability_technologies capability_technologies[]
+  companies               companies                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  company_sites           company_sites?            @relation(fields: [site_id], references: [id], onUpdate: NoAction)
+  taxonomy_nodes          taxonomy_nodes            @relation(fields: [taxonomy_node_id], references: [id], onUpdate: NoAction)
+  fact_assertions         fact_assertions[]
+
+  @@unique([id, company_id])
+  @@index([company_id], map: "ix_capability_company")
+  @@index([execution_mode, b2b_availability], map: "ix_capability_execution")
+  @@index([taxonomy_node_id], map: "ix_capability_taxonomy")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model company_contacts {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id    String    @db.Uuid
+  contact_type  String
+  contact_value String
+  is_public     Boolean   @default(false)
+  source_id     String?   @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  companies     companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sources       sources?  @relation(fields: [source_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model company_roles {
+  company_id String    @db.Uuid
+  role_code  String
+  companies  companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([company_id, role_code])
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model company_sites {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id           String                 @db.Uuid
+  site_kind            site_kind              @default(OTHER)
+  address_line         String?
+  city                 String
+  province_code        String?                @db.VarChar(3)
+  postal_code          String?
+  country_code         String                 @default("IT") @db.Char(2)
+  is_primary           Boolean                @default(false)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  company_capabilities company_capabilities[]
+  companies            companies              @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model fact_assertions {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id           String                @db.Uuid
+  capability_id        String?               @db.Uuid
+  scope                assertion_scope
+  field_path           String
+  value_jsonb          Json
+  verification_status  verification_status   @default(UNREVIEWED)
+  reviewer_note        String?
+  checked_at           DateTime?             @db.Timestamptz(6)
+  created_at           DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime              @default(now()) @db.Timestamptz(6)
+  assertion_sources    assertion_sources[]
+  company_capabilities company_capabilities? @relation(fields: [capability_id, company_id], references: [id, company_id], onDelete: Cascade, onUpdate: NoAction)
+  companies            companies             @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([company_id, field_path], map: "ix_assertions_company_field")
+}
+
+model materials {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                 String                 @unique
+  label_it             String
+  label_en             String?
+  capability_materials capability_materials[]
+}
+
+model sources {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  url               String              @unique
+  title             String
+  publisher         String
+  source_kind       source_kind
+  source_state      source_state        @default(ACTIVE)
+  published_on      DateTime?           @db.Date
+  accessed_at       DateTime            @default(now()) @db.Timestamptz(6)
+  content_sha256    String?             @db.Char(64)
+  note              String?
+  assertion_sources assertion_sources[]
+  company_contacts  company_contacts[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model taxonomy_nodes {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taxonomy_version     String                 @default("PRATOHUB-TX-1.0")
+  code                 String
+  level                Int                    @db.SmallInt
+  parent_id            String?                @db.Uuid
+  label_it             String
+  label_en             String?
+  description_it       String?
+  active               Boolean                @default(true)
+  sort_order           Int                    @default(0) @db.SmallInt
+  company_capabilities company_capabilities[]
+  taxonomy_nodes       taxonomy_nodes?        @relation("taxonomy_nodesTotaxonomy_nodes", fields: [parent_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  other_taxonomy_nodes taxonomy_nodes[]       @relation("taxonomy_nodesTotaxonomy_nodes")
+
+  @@unique([taxonomy_version, code])
+  @@index([parent_id], map: "ix_taxonomy_parent")
+}
+
+model technologies {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                    String                    @unique
+  family                  String
+  label_it                String
+  label_en                String?
+  capability_technologies capability_technologies[]
+}
+
+enum assertion_scope {
+  COMPANY
+  CAPABILITY
+}
+
+enum b2b_availability {
+  CONFIRMED
+  UNKNOWN
+  NOT_OFFERED
+}
+
+enum claim_status {
+  UNCLAIMED
+  PENDING
+  CLAIMED
+}
+
+enum execution_mode {
+  DIRECT
+  SUBCONTRACTED
+  COORDINATED
+  COMMERCIAL_ONLY
+  UNKNOWN
+}
+
+enum publication_status {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum site_kind {
+  REGISTERED_OFFICE
+  HEADQUARTERS
+  PRODUCTION_SITE
+  WAREHOUSE
+  SHOWROOM
+  OTHER
+}
+
+enum source_kind {
+  OFFICIAL_REGISTER
+  COMPANY_WEBSITE
+  COMPANY_DOCUMENT
+  DIRECT_DECLARATION
+  THIRD_PARTY
+}
+
+enum source_state {
+  ACTIVE
+  UNAVAILABLE
+  SUPERSEDED
+}
+
+enum verification_status {
+  UNREVIEWED
+  SOURCE_CHECKED
+  INDEPENDENTLY_VERIFIED
+  DISPUTED
+  REJECTED
+}
