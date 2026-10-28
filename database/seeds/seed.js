@@ -15,7 +15,7 @@ function splitSql(sql) {
  return result;
 }
 async function main() {
- for (const f of ['01_taxonomy.sql','02_materials.sql','03_technologies.sql','04_manteco.sql']) {
+ for (const f of ['01_taxonomy.sql','02_materials.sql','03_technologies.sql','04_manteco.sql','05_companies.sql']) {
   const sql = fs.readFileSync(path.join(__dirname,f),'utf8').replace(/^--.*$/gm,'');
   const statements = splitSql(sql);
   await db.$transaction(async tx => { for (const s of statements) await tx.$executeRawUnsafe(s); });
