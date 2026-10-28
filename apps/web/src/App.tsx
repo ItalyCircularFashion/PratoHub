@@ -1,10 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getCatalog } from './services/catalog';
-import { Home, Intelligence, ArticlePage, Network, CompanyPage, Taxonomy, NotFound } from './pages';
+import { Home, Intelligence, ArticlePage, Network, CompanyPage, NotFound } from './pages';
+import { Taxonomy } from './taxonomy';
+import { Brief } from './brief';
 import './styles.css';
+import './evolution.css';
 
 type Catalog = Awaited<ReturnType<typeof getCatalog>>;
-const nav = [{ to: '/', label: 'Home' }, { to: '/intelligence', label: 'Intelligence' }, { to: '/network', label: 'Network' }, { to: '/filiera', label: 'Filiera' }];
+const nav = [{ to: '/', label: 'Home' }, { to: '/intelligence', label: 'Intelligence' }, { to: '/network', label: 'Network' }, { to: '/filiera', label: 'Filiera' }, { to: '/brief', label: 'Brief' }];
 function currentRoute() { const hash = window.location.hash.slice(1); return !hash || hash === 'main-content' ? '/' : hash; }
 function Shell({ route, children }: { route: string; children: ReactNode }) {
   const [menu, setMenu] = useState(false);
@@ -35,7 +38,8 @@ export function App() {
   else if (!catalog) view = <section className="section container"><p role="status">Caricamento dei dati pubblici…</p></section>;
   else if (path === '/intelligence') view = <Intelligence catalog={catalog} route={route}/>;
   else if (path === '/network') view = <Network catalog={catalog}/>;
-  else if (path === '/filiera') view = <Taxonomy catalog={catalog}/>;
+  else if (path === '/filiera') view = <Taxonomy catalog={catalog} route={route}/>;
+  else if (path === '/brief') view = <Brief catalog={catalog} route={route}/>;
   else if (path.startsWith('/intelligence/articolo/')) view = <ArticlePage catalog={catalog} slug={path.slice('/intelligence/articolo/'.length)}/>;
   else if (path.startsWith('/network/azienda/')) view = <CompanyPage catalog={catalog} slug={path.slice('/network/azienda/'.length)}/>;
   else view = <NotFound/>;
