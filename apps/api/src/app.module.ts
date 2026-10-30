@@ -3,5 +3,6 @@ import { TaxonomyController } from './taxonomy.controller';
 import { AdminTaxonomyController } from './admin-taxonomy.controller';
 import { AdminAuthGuard } from './admin-auth.guard';
 import { PrismaService } from './prisma.service';
-@Module({ controllers: [TaxonomyController, AdminTaxonomyController], providers: [PrismaService, AdminAuthGuard] })
+import { CompaniesController } from './companies.controller';
+@Module({ controllers: [TaxonomyController, AdminTaxonomyController, CompaniesController], providers: [PrismaService, AdminAuthGuard] })
 export class AppModule {}

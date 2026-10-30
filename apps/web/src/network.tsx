@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
 import { filterCompanies, type getCatalog } from './services/catalog';
 import { Link, NotFound, PageHero, SectionHeading } from './components';
+import { networkRoute, readNetworkFilters } from './services/navigation';
+import { navigate } from './ui';
 type Catalog = Awaited<ReturnType<typeof getCatalog>>;
 const emptyFilters = { query: '', macroarea: '', process: '', specialization: '', material: '', locality: '' };
-export function Network({ catalog }: { catalog: Catalog }) {
-  const [f, setF] = useState(emptyFilters);
+export function Network({ catalog, route }: { catalog: Catalog; route: string }) {
+  const f = readNetworkFilters(route, catalog.taxonomy, catalog.materials);
+  const setF = (next: typeof emptyFilters) => navigate(networkRoute(next), true);
   const macros = catalog.taxonomy.filter(n => n.level === 1);
   const processes = catalog.taxonomy.filter(n => n.level === 2 && n.parentCode === f.macroarea);
   const specializations = catalog.taxonomy.filter(n => n.level === 3 && n.parentCode === f.process);

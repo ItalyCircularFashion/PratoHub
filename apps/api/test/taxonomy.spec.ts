@@ -20,7 +20,14 @@ describe('WP01 HTTP and PostgreSQL integration', () => {
   if (missing) await request(app.getHttpServer()).get(`/api/v1/taxonomy/${missing}/children`).expect(404);
   for (const url of ['/api/v1/taxonomy?level=0','/api/v1/taxonomy?level=01','/api/v1/taxonomy?level=1&level=2','/api/v1/taxonomy?x=1','/api/v1/taxonomy/nope/children']) await request(app.getHttpServer()).get(url).expect(400);
  });
- it('does not expose company, admin, or writes', async () => { await request(app.getHttpServer()).get('/api/v1/companies').expect(404); await request(app.getHttpServer()).post('/api/v1/admin/companies').expect(404); await request(app.getHttpServer()).post('/api/v1/taxonomy').expect(404); });
+ it('restricts public companies and does not expose admin companies or writes', async () => {
+  const companies = await request(app.getHttpServer()).get('/api/v1/companies').expect(200);
+  expect(companies.body).toEqual({items:[]}); // Publication is still blocked in this dedicated fixture DB.
+  await request(app.getHttpServer()).get('/api/v1/companies?publication_status=DRAFT').expect(400);
+  await request(app.getHttpServer()).get('/api/v1/companies/manteco').expect(404);
+  await request(app.getHttpServer()).post('/api/v1/admin/companies').expect(404);
+  await request(app.getHttpServer()).post('/api/v1/taxonomy').expect(404);
+ });
  it('rejects invalid parent mutation, version mutation and inactive referenced leaf', async () => {
   await expect(db.$executeRaw`UPDATE taxonomy_nodes SET level=1,parent_id=NULL WHERE code='TX-06.01'`).rejects.toThrow();
   await expect(db.$executeRaw`UPDATE taxonomy_nodes SET taxonomy_version='other' WHERE code='TX-06.01'`).rejects.toThrow();
