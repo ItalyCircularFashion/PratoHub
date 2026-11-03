@@ -94,12 +94,24 @@ for (const colorScheme of ['light', 'dark'] as const) {
         expect((await contrastFailures(page)).failures.filter(failure => failure.includes('skip-link'))).toEqual([]);
         const footerLink = page.locator('.site-footer a').first();
         await footerLink.focus();
+        await expect(footerLink).toBeFocused();
         const focus = await footerLink.evaluate(element => {
           const style = getComputedStyle(element);
-          return { visible: element.matches(':focus-visible'), width: parseFloat(style.outlineWidth), color: style.outlineColor };
+          const luminance = (color: string) => {
+            const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+            if (!channels || channels.length !== 3) throw new Error(`Unsupported focus color: ${color}`);
+            return channels.map(channel => {
+              const value = channel / 255;
+              return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+            }).reduce((sum, channel, i) => sum + channel * [.2126, .7152, .0722][i], 0);
+          };
+          let background = element;
+          while (background.parentElement && getComputedStyle(background).backgroundColor === 'rgba(0, 0, 0, 0)') background = background.parentElement;
+          const values = [luminance(style.outlineColor), luminance(getComputedStyle(background).backgroundColor)].sort((a, b) => a - b);
+          return { visible: element.matches(':focus-visible'), width: parseFloat(style.outlineWidth), contrast: (values[1] + .05) / (values[0] + .05) };
         });
         expect(focus.visible).toBe(true); expect(focus.width).toBeGreaterThanOrEqual(2);
-        expect(focus.color).toBe('rgb(255, 255, 255)');
+        expect(focus.contrast).toBeGreaterThanOrEqual(3);
       });
     });
   }
