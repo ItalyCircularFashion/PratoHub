@@ -97,18 +97,37 @@ test('taxonomy search, required fields and local Brief export work end to end', 
   await expect(page.getByRole('heading', { name: 'Brief: nessun invio' })).toBeVisible();
 });
 
-test('mobile menu supports Escape, navigation and the skip link', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 }); await page.goto(root);
-  const toggle = page.locator('.menu-toggle');
-  await toggle.click(); await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await page.keyboard.press('Escape'); await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(toggle).toBeFocused(); await toggle.click();
-  await page.getByRole('navigation', { name: 'Navigazione mobile' }).getByRole('link', { name: 'Filiera', exact: true }).click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.locator('main')).toBeFocused();
-  await page.goto(root); await page.keyboard.press('Tab'); await page.keyboard.press('Enter');
-  await expect(page.locator('main')).toBeFocused();
-});
+for (const { locale, label, detectedLocale } of [
+  { locale: 'it-IT', label: 'Filiera', detectedLocale: 'it' },
+  { locale: 'en-US', label: 'Supply chain', detectedLocale: 'en' },
+  { locale: 'fr-FR', label: 'Filiera', detectedLocale: 'it' },
+]) {
+  test.describe(`mobile navigation: ${locale}`, () => {
+    test.use({ locale });
+    test('mobile menu supports Escape, navigation and the skip link', async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 }); await page.goto(root);
+      await expect(page.locator('html')).toHaveAttribute('data-locale', detectedLocale);
+      const toggle = page.locator('.menu-toggle');
+      await toggle.click(); await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      await page.keyboard.press('Escape'); await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expect(toggle).toBeFocused(); await toggle.click();
+      const link = page.getByRole('navigation', { name: 'Navigazione mobile' })
+        .getByRole('link', { name: label, exact: true });
+      await expect(link).toHaveAttribute('href', '#/filiera');
+      await link.click();
+      await expect(page).toHaveURL(/#\/filiera$/);
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.locator('main')).toBeFocused();
+      await page.goto(`${root}#/network`); await page.reload();
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await page.keyboard.press('Tab');
+      await expect(page.locator('.skip-link')).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('main')).toBeFocused();
+      await expect(page).toHaveURL(/#\/network$/);
+    });
+  });
+}
 
 test('all primary screens stay within desktop, tablet and small mobile viewports', async ({ page }) => {
   for (const width of [1440, 768, 390, 320]) {

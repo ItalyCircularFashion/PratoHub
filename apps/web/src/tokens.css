@@ -20,18 +20,26 @@
   --accent-soft: #faeedb;
   --blue: #1748db;
   --blue-dark: #1236ad;
+  --blue-fill-dark: #1236ad;
   --blue-pale: #e8edff;
   --blue-soft: #f5f8ff;
 
   --paper: #f5f3ec;
   --surface: #fffef9;
   --surface-elevated: #ffffff;
+  --surface-soft: #eaece5;
   --ink: #151b20;
   --ink-soft: #2a343c;
   --muted: #5b6468;
-  --muted-soft: #8a9398;
+  --muted-soft: #626b6e;
   --line: #c6c9c2;
   --line-soft: #d8dde0;
+
+  /* Superfici intenzionalmente scure: non si invertono con il tema. */
+  --inverse-surface: #151b20;
+  --inverse-ink: #f5f3ec;
+  --inverse-muted: #e2e5e0;
+  --inverse-accent: #b9c9ff;
 
   --error: #9d2929;
   --success: #1f7a43;
@@ -52,38 +60,20 @@
     --paper: #12161c;
     --surface: #1a1f25;
     --surface-elevated: #232931;
+    --surface-soft: #202730;
     --ink: #e8ecf0;
     --ink-soft: #c7d0d6;
     --muted: #aeb9c0;
-    --muted-soft: #7a8790;
+    --muted-soft: #a0abb4;
     --line: #2c343c;
     --line-soft: #232931;
     --blue-pale: #1d2735;
     --blue-soft: #182028;
+    --blue-dark: #aabfff;
+    --focus-ring: #aabfff;
     --error: #f27676;
     --success: #7ccf96;
     --accent: #e07b4a;
   }
 
-  /* Panel editoriale e bande che sono volutamente scuri: restano leggibili
-   * in entrambi i temi (non si illuminano sulla pagina scura). */
-  .editorial-panel {
-    background: var(--ink) !important;
-    color: var(--paper) !important;
-  }
-  .editorial-panel .eyebrow,
-  .editorial-panel .section-copy {
-    color: var(--muted-soft) !important;
-  }
-  .filiera-band {
-    background: var(--blue-dark) !important;
-    color: var(--paper) !important;
-  }
-  .filiera-band .eyebrow {
-    color: var(--muted-soft) !important;
-  }
-  .filiera-band a,
-  .filiera-band :focus-visible {
-    color: var(--paper) !important;
-  }
 }
