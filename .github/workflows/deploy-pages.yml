@@ -49,7 +49,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ./.playwright-browsers
         run: npx playwright install chromium --only-shell --with-deps
       - name: Test built frontend navigation and responsive flows
-        run: npm run test:e2e
+        run: npm run test:e2e -- --reporter=list,github
       - name: Upload only the scanned frontend
         uses: actions/upload-pages-artifact@v3
         with:
