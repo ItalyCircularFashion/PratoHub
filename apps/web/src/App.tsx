@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { getCatalog } from './services/catalog';
 import { Home, Intelligence, ArticlePage } from './editorial';
 import { Network, CompanyPage } from './network';
@@ -6,6 +6,8 @@ import { NotFound, Link, PageHero } from './components';
 import { Taxonomy } from './taxonomy';
 import { Brief } from './brief';
 import { Dashboard } from './dashboard';
+import { setLocale, getLocale, t, NAV_KEYS } from './locales';
+import './tokens.css';
 import './styles.css';
 import './evolution.css';
 
@@ -30,6 +32,9 @@ function Shell({ route, children }: { route: string; children: ReactNode }) {
   const path = route.split('?')[0];
   const previousPath = useRef(path);
   useEffect(() => { setMenu(false); }, [route]);
+  useLayoutEffect(() => {
+    setLocale(getLocale());
+  }, []);
   useEffect(() => {
     if (previousPath.current !== path) { window.scrollTo({ top: 0, behavior: 'instant' }); main.current?.focus(); }
     previousPath.current = path;
@@ -42,7 +47,11 @@ function Shell({ route, children }: { route: string; children: ReactNode }) {
     window.addEventListener('keydown', escape);
     return () => window.removeEventListener('keydown', escape);
   }, [menu]);
-  const links = navigation.map(item => <a key={item.to} className="nav-link" href={`#${item.to}`} aria-current={path === item.to ? 'page' : undefined}>{item.label}</a>);
+  const tNav = (route: string): string => {
+    const key = NAV_KEYS[route];
+    return key !== undefined ? t(getLocale(), key) : route;
+  };
+  const links = navigation.map(item => <a key={item.to} className="nav-link" href={`#${item.to}`} aria-current={path === item.to ? 'page' : undefined}>{tNav(item.to)}</a>);
   return <>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Vai al contenuto</a>
     <header className="site-header"><div className="header-inner container"><a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">P<span>.</span></span><span>PratoHub<small>TEXTILE INTELLIGENCE & NETWORK</small></span></a><nav className="desktop-nav" aria-label="Navigazione principale">{links}</nav><button ref={toggle} className="menu-toggle" type="button" aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu(!menu)}>{menu ? 'Chiudi' : 'Menu'} <span aria-hidden="true">{menu ? '×' : '☰'}</span></button></div><nav id="mobile-menu" className="mobile-nav" aria-label="Navigazione mobile" hidden={!menu}>{links}</nav></header>

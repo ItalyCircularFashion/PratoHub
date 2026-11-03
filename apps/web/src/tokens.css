@@ -1,0 +1,89 @@
+/* PratoHub — tokens. Layer di design unica (font, paletto, spaziatura, mode).
+ * Importata PRIMA di styles.css e evolution.css: le variabili devono esistere
+ * prima che questi fogli le consulti. I nomi non cambiano: --blue, --paper, ...
+ * restano stabili per non frangenti dashboard.css / evolution.css. */
+
+:root {
+  color-scheme: light;
+
+  /* Font (solo stack locali: nessun carico esterno, nessun leak di rete). */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-display:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman",
+    serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* Paletto editoriale: primario=blue (azione/CTA), accento caldo=terracotta
+   * per sfondi e sottolinee di attenzione, tonalità per gerarchia. */
+  --accent: #b4532a;
+  --accent-soft: #faeedb;
+  --blue: #1748db;
+  --blue-dark: #1236ad;
+  --blue-pale: #e8edff;
+  --blue-soft: #f5f8ff;
+
+  --paper: #f5f3ec;
+  --surface: #fffef9;
+  --surface-elevated: #ffffff;
+  --ink: #151b20;
+  --ink-soft: #2a343c;
+  --muted: #5b6468;
+  --muted-soft: #8a9398;
+  --line: #c6c9c2;
+  --line-soft: #d8dde0;
+
+  --error: #9d2929;
+  --success: #1f7a43;
+
+  --content-width: 1440px;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --section-space: clamp(4rem, 8vw, 8.5rem);
+  --ease: 180ms ease;
+
+  /* Accessibilità: contorno del focus visibile. */
+  --focus-ring: var(--blue);
+}
+
+/* Modalità scura (override marginale, basata su prefers-color-scheme). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #12161c;
+    --surface: #1a1f25;
+    --surface-elevated: #232931;
+    --ink: #e8ecf0;
+    --ink-soft: #c7d0d6;
+    --muted: #aeb9c0;
+    --muted-soft: #7a8790;
+    --line: #2c343c;
+    --line-soft: #232931;
+    --blue-pale: #1d2735;
+    --blue-soft: #182028;
+    --error: #f27676;
+    --success: #7ccf96;
+    --accent: #e07b4a;
+  }
+
+  /* Panel editoriale e bande che sono volutamente scuri: restano leggibili
+   * in entrambi i temi (non si illuminano sulla pagina scura). */
+  .editorial-panel {
+    background: var(--ink) !important;
+    color: var(--paper) !important;
+  }
+  .editorial-panel .eyebrow,
+  .editorial-panel .section-copy {
+    color: var(--muted-soft) !important;
+  }
+  .filiera-band {
+    background: var(--blue-dark) !important;
+    color: var(--paper) !important;
+  }
+  .filiera-band .eyebrow {
+    color: var(--muted-soft) !important;
+  }
+  .filiera-band a,
+  .filiera-band :focus-visible {
+    color: var(--paper) !important;
+  }
+}

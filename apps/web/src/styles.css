@@ -1,23 +1,7 @@
-/* PratoHub — an editorial system for a working textile district. */
-:root {
-  color-scheme: light;
-  --paper: #f5f3ec;
-  --surface: #fffef9;
-  --ink: #151b20;
-  --muted: #4f5b60;
-  --line: #c6c9c2;
-  --blue: #1748db;
-  --blue-dark: #1236ad;
-  --blue-pale: #e8edff;
-  --error: #9d2929;
-  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --content-width: 1440px;
-  --gutter: clamp(1.25rem, 4vw, 4rem);
-  --section-space: clamp(4rem, 8vw, 8.5rem);
-  --ease: 180ms ease;
-}
+/* PratoHub — an editorial system for a working textile district.
+ * Tipografia e paletto vengono dal layer `tokens.css` (design tokens unici);
+ * i nomi delle variabili non cambiano: --blue, --paper, ... restano stabili
+ * per non frangenti dashboard.css ed evolution.css. */
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -83,14 +67,12 @@ h1, h2, h3 { line-height: 1.08; }
 .card-link { margin-top: auto; }
 .grid-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 4rem); }
 .editorial-panel { min-width: 0; padding: clamp(2rem, 4vw, 4rem); background: var(--ink); color: var(--paper); }
-.editorial-panel .eyebrow { color: #aabfff; }
-.editorial-panel p:not(.eyebrow) { color: #e2e5e0; }
+.editorial-panel .eyebrow { color: var(--muted-soft); }
+.editorial-panel p:not(.eyebrow) { color: var(--muted-soft); }
 .editorial-panel a { color: inherit; }
-.editorial-panel :focus-visible { outline-color: #fff; }
 .filiera-band { padding-block: clamp(2.5rem, 5vw, 4.5rem); background: var(--blue); color: white; }
 .filiera-band .eyebrow { color: #e4eaff; }
 .filiera-band a { color: inherit; }
-.filiera-band :focus-visible { outline-color: white; }
 .taxonomy-card { border-top: 3px solid var(--blue); }
 
 /* Inner pages and useful operating states. */
@@ -101,9 +83,9 @@ h1, h2, h3 { line-height: 1.08; }
 .search-panel { padding: clamp(1.25rem, 3vw, 2.5rem); border: 1px solid var(--line); background: var(--surface); }
 .field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: .45rem; min-width: 0; font-size: .85rem; font-weight: 700; }
-.field input, .field select, .field textarea { width: 100%; min-width: 0; min-height: 48px; padding: .7rem .8rem; border: 1px solid #7b8583; border-radius: 0; background: white; color: var(--ink); font-size: 1rem; font-weight: 400; }
+.field input, .field select, .field textarea { width: 100%; min-width: 0; min-height: 48px; padding: .7rem .8rem; border: 1px solid #7b8583; border-radius: 0; background: var(--surface-elevated); color: var(--ink); font-size: 1rem; font-weight: 400; }
 .field textarea { min-height: 120px; resize: vertical; }
-.field input::placeholder, .field textarea::placeholder { color: #626b6e; opacity: 1; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted-soft); opacity: 1; }
 .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { outline-offset: 1px; }
 .results-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; padding-block: 1.25rem; border-bottom: 1px solid var(--ink); color: var(--muted); font-size: .875rem; }
 .empty-state { padding: clamp(2.5rem, 5vw, 4.5rem) 1.5rem; border: 1px solid var(--line); background: var(--surface); }
@@ -117,7 +99,7 @@ h1, h2, h3 { line-height: 1.08; }
 .taxonomy-option:hover { background: var(--blue-pale); }
 .taxonomy-option.active, .taxonomy-option[aria-selected="true"], .taxonomy-option[aria-current="true"] { background: var(--blue); color: white; font-weight: 700; }
 .taxonomy-option.active:focus-visible, .taxonomy-option[aria-selected="true"]:focus-visible { outline-color: var(--ink); outline-offset: -4px; }
-.status-note { padding: 1rem 1.2rem; border: 1px solid #a6b5ea; background: var(--blue-pale); color: var(--ink); }
+.status-note { padding: 1rem 1.2rem; border: 1px solid var(--blue-pale); background: var(--blue-soft); color: var(--ink); }
 .error-box { padding: 1rem 1.2rem; border: 1px solid var(--error); background: #fff1ef; color: #762020; }
 .not-found { padding-block: var(--section-space); }
 
@@ -127,7 +109,7 @@ h1, h2, h3 { line-height: 1.08; }
 .footer-brand { font-size: 1.55rem; font-weight: 800; letter-spacing: -.05em; }
 .site-footer a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
 .site-footer a:hover { color: #bdcaff; }
-.site-footer :focus-visible { outline-color: white; }
+.site-footer :focus-visible { outline-color: var(--blue); }
 .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem 2rem; margin-top: clamp(3rem, 6vw, 6rem); padding-top: 1.25rem; border-top: 1px solid #687173; color: #d5d9d5; font-size: .8rem; }
 
 @media (max-width: 1023.98px) {
@@ -158,6 +140,11 @@ h1, h2, h3 { line-height: 1.08; }
   .hero-actions .button { width: 100%; }
   .hero-visual { min-height: 260px; }
 }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
 /* Component integration: typography, card counts and real navigation states. */
 .brand-mark { display: inline-flex; justify-content: center; align-items: center; }
 .brand > span:last-child { display: flex; flex-direction: column; gap: .28rem; min-width: 0; }
@@ -197,11 +184,4 @@ h1, h2, h3 { line-height: 1.08; }
 @media (max-width: 767.98px) {
   .brand small { font-size: .48rem; }
   .filiera-band { grid-template-columns: 1fr; }
-}
-@media (max-width: 480px) {
-  .cards-grid { grid-template-columns: minmax(0, 1fr); }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
