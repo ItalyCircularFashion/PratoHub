@@ -7,6 +7,7 @@
 .form-section .field + .field { margin-top: .25rem; }
 .field-hint { margin-top: .35rem; color: var(--muted); font-size: .8rem; font-weight: 400; line-height: 1.4; }
 .field-hint + .field-hint { margin-top: .25rem; }
+.field-error { margin: .35rem 0 .75rem; color: var(--error); font-size: .85rem; line-height: 1.4; }
 .form-errors { padding: 1rem 1.2rem; border: 1px solid var(--error); background: #fff1ef; color: #762020; }
 .form-errors h2 { font-size: 1rem; margin-bottom: .5rem; }
 .form-errors ul { margin: .25rem 0 0 1.2rem; padding: 0; }

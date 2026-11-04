@@ -100,7 +100,7 @@ h1, h2, h3 { line-height: 1.08; }
 .taxonomy-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 48px; padding: .7rem .8rem; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; text-decoration: none; overflow-wrap: anywhere; }
 .taxonomy-option:hover { background: var(--blue-pale); }
 .taxonomy-option.active, .taxonomy-option[aria-selected="true"], .taxonomy-option[aria-current="true"] { background: var(--blue); color: white; font-weight: 700; }
-.taxonomy-option.active:focus-visible, .taxonomy-option[aria-selected="true"]:focus-visible { outline-color: var(--ink); outline-offset: -4px; }
+.taxonomy-option.active:focus-visible, .taxonomy-option[aria-selected="true"]:focus-visible { outline-color: white; outline-offset: -4px; }
 .status-note { padding: 1rem 1.2rem; border: 1px solid var(--blue-pale); background: var(--blue-soft); color: var(--ink); }
 .error-box { padding: 1rem 1.2rem; border: 1px solid var(--error); background: #fff1ef; color: #762020; }
 .not-found { padding-block: var(--section-space); }

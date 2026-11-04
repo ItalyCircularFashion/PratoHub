@@ -6,17 +6,25 @@ export const blankBrief: BriefValues = { title: '', node: '', material: '', quan
 export const briefUnits = ['m', 'kg', 'pezzi'] as const;
 export const fieldLimits = { title: 120, notes: 3000 };
 
-/** Transient client document, never a submitted RFQ or evidence of capacity. */
-export function validateBrief(values: BriefValues, nodes: TaxonomyNode[], materials: DictionaryItem[]): string[] {
-  const errors: string[] = [];
-  if (!values.title.trim() || values.title.length > fieldLimits.title) errors.push('Indica un titolo da 1 a 120 caratteri.');
-  if (!taxonomyPath(values.node, nodes).length) errors.push('Seleziona una lavorazione dalla classificazione.');
-  if (values.material && !materials.some(m => m.code === values.material)) errors.push('Seleziona un materiale disponibile oppure lascia il campo non specificato.');
-  if (values.quantity && (!/^\d+(?:[.,]\d{1,3})?$/.test(values.quantity) || Number(values.quantity.replace(',', '.')) <= 0 || Number(values.quantity.replace(',', '.')) > 1e9)) errors.push('La quantità deve essere positiva, non superiore a 1.000.000.000 e con al massimo 3 decimali.');
-  if (!briefUnits.some(unit => unit === values.unit)) errors.push('Seleziona un’unità di misura disponibile.');
-  if (values.delivery && (!/^\d{4}-\d{2}-\d{2}$/.test(values.delivery) || Number.isNaN(Date.parse(values.delivery)) || new Date(values.delivery).toISOString().slice(0, 10) !== values.delivery)) errors.push('Indica una data valida oppure lascia la data non specificata.');
-  if (values.notes.length > fieldLimits.notes) errors.push('Le note possono contenere al massimo 3.000 caratteri.');
+export type BriefErrors = Partial<Record<keyof BriefValues, string>>;
+export type BriefValidationContext = { deliveryBadInput?: boolean };
+
+/** Return field-specific errors; native date segments are not represented by value alone. */
+export function validateBriefFields(values: BriefValues, nodes: TaxonomyNode[], materials: DictionaryItem[], context: BriefValidationContext = {}): BriefErrors {
+  const errors: BriefErrors = {};
+  if (!values.title.trim() || values.title.length > fieldLimits.title) errors.title = 'Indica un titolo da 1 a 120 caratteri.';
+  if (!taxonomyPath(values.node, nodes).length) errors.node = 'Seleziona una lavorazione dalla classificazione.';
+  if (values.material && !materials.some(m => m.code === values.material)) errors.material = 'Seleziona un materiale disponibile oppure lascia il campo non specificato.';
+  if (values.quantity && (!/^\d+(?:[.,]\d{1,3})?$/.test(values.quantity) || Number(values.quantity.replace(',', '.')) <= 0 || Number(values.quantity.replace(',', '.')) > 1e9)) errors.quantity = 'La quantità deve essere positiva, non superiore a 1.000.000.000 e con al massimo 3 decimali.';
+  if (!briefUnits.some(unit => unit === values.unit)) errors.unit = 'Seleziona un’unità di misura disponibile.';
+  if (context.deliveryBadInput || values.delivery && (!/^\d{4}-\d{2}-\d{2}$/.test(values.delivery) || Number.isNaN(Date.parse(values.delivery)) || new Date(values.delivery).toISOString().slice(0, 10) !== values.delivery)) errors.delivery = 'Indica una data valida oppure lascia la data non specificata.';
+  if (values.notes.length > fieldLimits.notes) errors.notes = 'Le note possono contenere al massimo 3.000 caratteri.';
   return errors;
+}
+
+/** Transient client document, never a submitted RFQ or evidence of capacity. */
+export function validateBrief(values: BriefValues, nodes: TaxonomyNode[], materials: DictionaryItem[], context: BriefValidationContext = {}): string[] {
+  return Object.values(validateBriefFields(values, nodes, materials, context)).filter((message): message is string => typeof message === 'string');
 }
 
 export function buildBrief(values: BriefValues, nodes: TaxonomyNode[], materials: DictionaryItem[]) {

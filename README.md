@@ -1,8 +1,21 @@
-# PratoHub Local Alpha — WP00 / WP01
+# PratoHub — frontend pubblico e backend locale
 
-Monorepo npm: `apps/web` React/TypeScript/Vite, `apps/api` Nest/TypeScript, `packages/shared`, `database` Prisma/PostgreSQL. UI è esclusivamente una pagina segnaposto, nessuna migrazione grafica. Non è un servizio di produzione.
+Monorepo npm: `apps/web` React/TypeScript/Vite, `apps/api` Nest/TypeScript, `packages/shared`, `database` Prisma/PostgreSQL. Il frontend pubblico comprende dashboard, DEMO sintetica separata, Filiera, Network, Brief locale e Intelligence. Il backend amministrativo resta un ambiente locale: non è un servizio B2B di produzione.
 
-## Avvio locale
+## Frontend statico: verifica senza database
+
+Per lavorare soltanto sull’interfaccia non occorrono migrazioni, seed o avvio del DB. Con le dipendenze installate:
+
+1. `npm run typecheck --workspace @pratohub/web` e `npm run test --workspace @pratohub/web`.
+2. `npm run build --workspace @pratohub/web -- --emptyOutDir --base /PratoHub/`.
+3. `node scripts/check-public-build.mjs` e `npm run test:e2e`. Playwright richiede il browser indicato nella configurazione e una porta 5178 libera; avvia e chiude da solo la preview.
+4. Per una preview manuale: `npm exec --workspace @pratohub/web -- vite preview --base /PratoHub/ --host 127.0.0.1 --port 8775 --strictPort`; aprire `http://localhost:8775/PratoHub/`.
+
+Il Brief esporta documenti sul dispositivo, senza invio email. La traduzione IT/EN riguarda la navigazione, non l’intero sito. Non vengono caricate bozze del DB nel catalogo statico. Il repository e la storia Git sono però pubblici: non custodirvi segreti o dati da mantenere riservati.
+
+Stato verificato, limiti e CQ corrente: `PROJECT_STATUS.md` e `docs/CQ_SENIOR_2026-11-04.md`. La verifica locale non autorizza un nuovo deploy.
+
+## Backend locale opzionale — baseline WP00/WP01
 Prerequisiti: Node 24, npm 11, Docker Compose, porte 127.0.0.1:55432, 3000 e 5173 libere. Non usare un database preesistente. Da questa directory:
 
 1. Copiare `.env.example` in `.env`, generare una password casuale locale e sostituire **entrambi** i segnaposto (password e URL) con lo stesso valore esadecimale. Impostare `PRATOHUB_ADMIN_ACTOR` all'identità reale dell'operatore locale (es. un nome scelto dall'operatore, quotato se contiene spazi). Generare nel file un token amministrativo casuale senza stamparlo: `node -e "const fs=require('fs'),c=require('crypto');let s=fs.readFileSync('.env','utf8');s=s.replace(/^PRATOHUB_ADMIN_TOKEN=.*$/m,'PRATOHUB_ADMIN_TOKEN='+c.randomBytes(32).toString('hex'));fs.writeFileSync('.env',s,{mode:0o600})"` e `chmod 600 .env`. Non condividere né committare `.env`. Il DB conserva la password iniziale nel volume; cambiare `.env` non la aggiorna nel DB. Se token o attore non sono configurati l'admin rifiuta ogni richiesta; nell'ambiente preparato il token esiste ma l'attore deve essere impostato dall'operatore.

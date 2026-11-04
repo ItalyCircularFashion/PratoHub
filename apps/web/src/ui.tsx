@@ -22,13 +22,14 @@ export function downloadText(text: string, filename: string, type = 'text/plain;
 }
 
 export function ShareRoute({ route, label = 'Condividi questa ricerca' }: { route: string; label?: string }) {
-  const [message, setMessage] = useState('');
+  const [feedback, setFeedback] = useState<{ url: string; message: string } | null>(null);
   const url = `${window.location.origin}${window.location.pathname}#${route}`;
+  const message = feedback?.url === url ? feedback.message : '';
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
-      setMessage('Link copiato.');
-    } catch { setMessage('Copia il link dal campo qui sopra: gli appunti non sono disponibili.'); }
+      setFeedback({ url, message: 'Link copiato.' });
+    } catch { setFeedback({ url, message: 'Copia il link dal campo qui sopra: gli appunti non sono disponibili.' }); }
   }
   return <details className="share-tools"><summary>{label}</summary><label className="share-field">Link pubblico<input readOnly value={url} onFocus={e => e.target.select()}/></label><button type="button" className="button button-secondary" onClick={copy}>Copia link</button><p className="share-message" role="status">{message}</p></details>;
 }

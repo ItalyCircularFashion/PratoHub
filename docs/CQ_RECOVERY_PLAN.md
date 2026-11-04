@@ -21,8 +21,10 @@ Le fasi 2 e 3 devono seguire il contratto pubblico della fase 1: ripristinare le
 
 ## Fase 0 — backup verificato
 
-Percorso: `/home/indigo/PratoHub-backups/20261030T170542/repo-snapshot`.
-Manifesto esterno allo snapshot: `/home/indigo/PratoHub-backups/20261030T170542/MANIFEST.json`.
+I riferimenti ai backup in questo registro sono relativi alla directory personale dell'operatore, non alla root del repository. Le copie restano esterne al progetto; il prefisso locale assoluto è omesso.
+
+Percorso: `PratoHub-backups/20261030T170542/repo-snapshot`.
+Manifesto esterno allo snapshot: `PratoHub-backups/20261030T170542/MANIFEST.json`.
 Verificati SHA-256 di 124 file regolari, stesso HEAD e stesso stato dirty dell'originale. Conservati anche `.git`, file locali e artefatti presenti; escluse directory rigenerabili `node_modules`, `.pgvenv`, `.playwright-browsers`, `test-results`, `playwright-report`. Backup esterno al repository e directory superiore con permessi 700.
 
 ## Fase 1 — analisi preventiva CQ + cybersecurity
@@ -89,7 +91,7 @@ Il registro sopra conserva le evidenze della prima sessione; le voci DA FARE e i
 - Conteggi derivati dal catalogo e dai risultati: non vengono pubblicate le statistiche economiche o le attribuzioni aziendali del vecchio modulo `data.ts`, che non è importato dalla nuova applicazione.
 - Filiera, Network e Brief collegati; filtri gerarchici persistenti nell'URL; esportazioni CSV e JSON locali; navigazione mobile e gestione focus collaudate.
 - Verifica eseguita sulla working tree: typecheck di tutti i workspace, lint, 12 test frontend, 26 test API isolati, build frontend e API: PASS. Scanner build pubblico: PASS, 5 file. Playwright: 9 test PASS, incluse larghezze 1440/768/390/320, filtri, reset, download e navigazione. Nessuna migrazione, seed o test con scritture DB eseguito.
-- Backup pre-rilascio con confronto dei byte: `/home/indigo/PratoHub-backups/pre-publish-20261030T182140`, 22 file modificati/nuovi.
+- Backup pre-rilascio con confronto dei byte: `PratoHub-backups/pre-publish-20261030T182140`, 22 file modificati/nuovi.
 - Escluse dal commit le modifiche pregresse a `database/seeds/05_companies.sql` (non collaudate, contatti sintetici non sicuri da presentare come reali) e `apps/web/src/data.ts` (modulo legacy non utilizzato). Restano locali e nel backup; non vengono cancellate.
 - Il repository pubblico e la sua cronologia sono una superficie diversa dal sito Pages: l'esclusione dal bundle non rende privati i sorgenti storici. La bonifica dei vecchi seed e delle informazioni legacy non fa parte di questo rilascio.
 
