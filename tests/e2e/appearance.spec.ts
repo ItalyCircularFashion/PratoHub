@@ -58,6 +58,25 @@ async function contrastFailures(page: import('@playwright/test').Page) {
   });
 }
 
+async function settlePaint(page: import('@playwright/test').Page) {
+  // Hash navigation can expose the new text before ancestor styles settle.
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+}
+
+test('contrast audit still rejects an intentionally unreadable masthead', async ({ page }) => {
+  await page.goto(root);
+  await expect(page.locator('.ph-home')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await settlePaint(page);
+  const baseline = await contrastFailures(page);
+  expect(baseline.checked).toBeGreaterThan(20);
+  expect(baseline.failures).toEqual([]);
+  await page.addStyleTag({ content: '.site-header { background: #777 !important; } .site-header .brand, .site-header .brand * { color: #777 !important; }' });
+  await settlePaint(page);
+  const unreadable = await contrastFailures(page);
+  expect(unreadable.failures.some(failure => failure.includes('PratoHub'))).toBe(true);
+});
+
 for (const colorScheme of ['light', 'dark'] as const) {
   for (const width of [1440, 390]) {
     test.describe(`appearance: ${colorScheme}, ${width}px`, () => {
@@ -71,6 +90,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
           await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
           await page.evaluate(() => document.fonts.ready);
           for (const summary of await page.locator('.share-tools summary').all()) await summary.click();
+          await settlePaint(page);
           const result = await contrastFailures(page);
           expect(result.checked, `No text measured on ${route}`).toBeGreaterThan(20);
           expect.soft(result.failures, `${colorScheme}, ${width}px, ${route}`).toEqual([]);
