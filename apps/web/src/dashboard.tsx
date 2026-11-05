@@ -16,7 +16,7 @@ export function Dashboard({ catalog, route }: { catalog: Catalog; route: string 
   const macros = catalog.taxonomy.filter(node => node.level === 1);
   function update(values: Partial<typeof filters>) {
     const next = { ...filters, ...values };
-    navigate(routeWith('/', { mode: demo ? 'demo' : '', q: next.query, macroarea: next.macroarea, process: next.process, specialization: next.specialization, material: next.material, locality: next.locality }), true);
+    navigate(routeWith('/dashboard', { mode: demo ? 'demo' : '', q: next.query, macroarea: next.macroarea, process: next.process, specialization: next.specialization, material: next.material, locality: next.locality }), true);
   }
   function exportMatches() {
     const cell = (value: string) => `"${(/^[=+@\-\t\r]/.test(value) ? "'" : '') + value.replaceAll('"', '""')}"`;
@@ -35,7 +35,7 @@ export function Dashboard({ catalog, route }: { catalog: Catalog; route: string 
       </dl>
       <div className={`dashboard-mode ${demo ? 'is-demo' : ''}`}>
         <div><h2>{demo ? 'Modalità DEMO — dati sintetici' : 'Catalogo pubblico'}</h2><p>{demo ? 'Nomi, località e capacità sono esempi di interfaccia. Non rappresentano imprese, disponibilità o certificazioni reali. Nessuna bozza del database viene caricata.' : 'I profili appariranno dopo revisione. Per provare ricerca e filtri puoi attivare un campione separato di schede sintetiche.'}</p></div>
-        <button className="button button-secondary" type="button" aria-pressed={demo} onClick={() => navigate(demo ? '/' : '/?mode=demo')}>{demo ? 'Torna ai dati pubblici' : 'Prova la modalità DEMO'}</button>
+        <button className="button button-secondary" type="button" aria-pressed={demo} onClick={() => navigate(demo ? '/dashboard' : '/dashboard?mode=demo')}>{demo ? 'Torna ai dati pubblici' : 'Prova la modalità DEMO'}</button>
       </div>
       <div className="search-panel dashboard-search"><div className="field-grid">
         <label className="field">Cerca nei profili {demo ? 'DEMO' : 'pubblici'}<input type="search" placeholder="Nome o territorio" maxLength={120} value={filters.query} onChange={e => update({ query: e.target.value })}/></label>
@@ -48,7 +48,7 @@ export function Dashboard({ catalog, route }: { catalog: Catalog; route: string 
         const path = capability ? taxonomyPath(capability.specializationCode, catalog.taxonomy) : [];
         return <li className="dashboard-company" key={company.id}><span className="card-index">{demo ? 'SCHEDA DEMO / NON REALE' : 'PROFILO PUBBLICO'}</span><h2>{company.name}</h2><p>{company.locality}</p><p>{path.map(n => n.label).join(' → ') || 'Lavorazione non specificata'}</p><div className="hero-actions">{capability && <Link className="text-link" to={routeWith('/filiera', { node: capability.specializationCode })}>Esplora la lavorazione ↗</Link>}<Link className="text-link" to={routeWith('/brief', { node: capability?.specializationCode || '' })}>Prepara un brief →</Link></div></li>;
       })}</ul>}
-      <ShareRoute route={routeWith('/', { mode: demo ? 'demo' : '', q: filters.query, macroarea: filters.macroarea, process: filters.process, specialization: filters.specialization, material: filters.material, locality: filters.locality })} label="Condividi questa ricerca"/>
+      <ShareRoute route={routeWith('/dashboard', { mode: demo ? 'demo' : '', q: filters.query, macroarea: filters.macroarea, process: filters.process, specialization: filters.specialization, material: filters.material, locality: filters.locality })} label="Condividi questa ricerca"/>
       <p className="field-hint">Fonte dei conteggi: catalogo locale PratoHub-TX-1.0 e risultati correnti, non statistiche economiche sul distretto. La modalità DEMO è distinta dalla directory pubblica.</p>
     </section>
   </>;

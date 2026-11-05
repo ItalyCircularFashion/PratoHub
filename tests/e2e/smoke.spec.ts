@@ -7,7 +7,7 @@ test('public dashboard is styled, honest and independent of localhost APIs', asy
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => { if (response.status() >= 400) badResponses.push(response.url()); });
   page.on('request', request => { if (request.url().includes('/api/')) apiRequests.push(request.url()); });
-  await page.goto(root);
+  await page.goto(`${root}#/dashboard`);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('La filiera tessile');
   await expect(page.getByRole('heading', { name: 'Nessun profilo pubblico disponibile' })).toBeVisible();
   await expect(page.locator('.dashboard-company')).toHaveCount(0);
@@ -18,7 +18,7 @@ test('public dashboard is styled, honest and independent of localhost APIs', asy
 });
 
 test('DEMO is explicit and search, macroareas, reset and pressed state agree', async ({ page }) => {
-  await page.goto(root);
+  await page.goto(`${root}#/dashboard`);
   await page.getByRole('button', { name: 'Prova la modalità DEMO' }).click();
   await expect(page.locator('.dashboard-company')).toHaveCount(12);
   await expect(page.getByRole('heading', { name: 'Modalità DEMO — dati sintetici' })).toBeVisible();

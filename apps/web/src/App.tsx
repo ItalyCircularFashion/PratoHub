@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { getCatalog } from './services/catalog';
-import { Home, Intelligence, ArticlePage } from './editorial';
+import { Intelligence, ArticlePage } from './editorial';
+import { HomeEditorial } from './HomeEditorial';
 import { Network, CompanyPage } from './network';
 import { NotFound, Link, PageHero } from './components';
 import { Taxonomy } from './taxonomy';
@@ -13,11 +14,16 @@ import './evolution.css';
 
 type Catalog = Awaited<ReturnType<typeof getCatalog>>;
 const navigation = [
-  { to: '/', label: 'Dashboard' }, { to: '/filiera', label: 'Filiera' },
+  { to: '/', label: 'Home' }, { to: '/dashboard', label: 'Dashboard' }, { to: '/filiera', label: 'Filiera' },
   { to: '/network', label: 'Network' }, { to: '/brief', label: 'Brief' },
   { to: '/intelligence', label: 'Intelligence' },
 ];
-function currentRoute() { const hash = window.location.hash.slice(1); return !hash || hash === 'main-content' ? '/' : hash; }
+function currentRoute() {
+  const hash = window.location.hash.slice(1);
+  if (!hash || hash === 'main-content') return '/';
+  // Keep a legacy dashboard query on the same React view from its first render.
+  return hash.startsWith('/?') ? `/dashboard${hash.slice(1)}` : hash;
+}
 
 class ErrorBoundary extends React.Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -30,6 +36,9 @@ function Shell({ route, children }: { route: string; children: ReactNode }) {
   const main = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const path = route.split('?')[0];
+  const legacyDashboard = path === '/' && route.includes('?');
+  const activePath = legacyDashboard ? '/dashboard' : path === '/progetto' ? '/' : path;
+  const editorialHome = (path === '/' && !legacyDashboard) || path === '/progetto';
   const previousPath = useRef(path);
   useEffect(() => { setMenu(false); }, [route]);
   useLayoutEffect(() => {
@@ -38,9 +47,9 @@ function Shell({ route, children }: { route: string; children: ReactNode }) {
   useEffect(() => {
     if (previousPath.current !== path) { window.scrollTo({ top: 0, behavior: 'instant' }); main.current?.focus(); }
     previousPath.current = path;
-    const title = navigation.find(item => item.to === path)?.label || (path === '/privacy' ? 'Dati e progetto' : path === '/progetto' ? 'Il progetto' : 'PratoHub');
+    const title = navigation.find(item => item.to === activePath)?.label || (path === '/privacy' ? 'Dati e progetto' : path === '/progetto' ? 'Il progetto' : 'PratoHub');
     document.title = `${title} · PratoHub`;
-  }, [path]);
+  }, [path, activePath]);
   useEffect(() => {
     if (!menu) return;
     const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenu(false); toggle.current?.focus(); } };
@@ -51,12 +60,12 @@ function Shell({ route, children }: { route: string; children: ReactNode }) {
     const key = NAV_KEYS[route];
     return key !== undefined ? t(getLocale(), key) : route;
   };
-  const links = navigation.map(item => <a key={item.to} className="nav-link" href={`#${item.to}`} lang={getLocale()} aria-current={path === item.to ? 'page' : undefined}>{tNav(item.to)}</a>);
+  const links = navigation.map(item => <a key={item.to} className="nav-link" href={`#${item.to}`} lang={getLocale()} aria-current={activePath === item.to ? 'page' : undefined}>{tNav(item.to)}</a>);
   return <>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Vai al contenuto</a>
-    <header className="site-header"><div className="header-inner container"><a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">P<span>.</span></span><span>PratoHub<small>TEXTILE INTELLIGENCE & NETWORK</small></span></a><nav className="desktop-nav" aria-label="Navigazione principale">{links}</nav><button ref={toggle} className="menu-toggle" type="button" aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu(!menu)}>{menu ? 'Chiudi' : 'Menu'} <span aria-hidden="true">{menu ? '×' : '☰'}</span></button></div><nav id="mobile-menu" className="mobile-nav" aria-label="Navigazione mobile" hidden={!menu}>{links}</nav></header>
+    <header className={`site-header${editorialHome ? ' ph-header' : ''}`}>{editorialHome && <div className="ph-masthead"><div className="ph-masthead-inner container"><span className="ph-masthead-location">PRATO / TOSCANA</span><span>CONOSCENZA · MANIFATTURA · CONNESSIONI</span></div></div>}<div className="header-inner container"><a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">P<span>.</span></span><span>PratoHub<small>TEXTILE INTELLIGENCE & NETWORK</small></span></a><nav className="desktop-nav" aria-label="Navigazione principale">{links}</nav><button ref={toggle} className="menu-toggle" type="button" aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu(!menu)}>{menu ? 'Chiudi' : 'Menu'} <span aria-hidden="true">{menu ? '×' : '☰'}</span></button></div><nav id="mobile-menu" className="mobile-nav" aria-label="Navigazione mobile" hidden={!menu}>{links}</nav></header>
     <main ref={main} id="main-content" className="site-main" tabIndex={-1}>{children}</main>
-    <footer className="site-footer"><div className="container"><div className="footer-grid"><div><div className="footer-brand">PratoHub<span>.</span></div><p>Strumenti per leggere la filiera e preparare richieste più chiare.</p></div><div><h2>Esplora</h2><Link to="/">Dashboard</Link><Link to="/filiera">Filiera tessile</Link><Link to="/brief">Brief locale</Link></div><div><h2>Il progetto</h2><Link to="/progetto">Presentazione</Link><Link to="/privacy">Dati e trasparenza</Link><p>Contenuti e profili pubblici solo dopo revisione. Le schede DEMO sono sintetiche.</p></div></div><div className="footer-bottom"><span>PratoHub · Italy CircularFashion</span><span>Prato / Italia</span></div></div></footer>
+    <footer className={`site-footer${editorialHome ? ' ph-footer' : ''}`}><div className="container"><div className="footer-grid"><div><div className="footer-brand">PratoHub<span>.</span></div><p>Strumenti per leggere la filiera e preparare richieste più chiare.</p></div><div><h2>Esplora</h2><Link to="/">Home</Link><Link to="/dashboard">Dashboard</Link><Link to="/filiera">Filiera tessile</Link><Link to="/brief">Brief locale</Link></div><div><h2>Il progetto</h2><Link to="/progetto">Presentazione</Link><Link to="/privacy">Dati e trasparenza</Link><p>Contenuti e profili pubblici solo dopo revisione. Le schede DEMO sono sintetiche.</p></div></div><div className="footer-bottom"><span>PratoHub · Italy CircularFashion</span><span>Prato / Italia</span></div></div></footer>
   </>;
 }
 
@@ -74,7 +83,7 @@ export function App() {
   const path = route.split('?')[0];
   let view: ReactNode;
   if (path === '/privacy') view = <Privacy/>;
-  else if (path === '/progetto') view = <Home/>;
+  else if ((path === '/' && !route.includes('?')) || path === '/progetto') view = <HomeEditorial/>;
   else if (error) view = <section className="section container"><h1>Catalogo non disponibile</h1><p>Il caricamento non è riuscito. Non verranno mostrati dati sintetici al posto di quelli pubblici.</p><button className="button button-secondary" onClick={() => setAttempt(value => value + 1)}>Riprova</button></section>;
   else if (!catalog) view = <section className="section container"><p role="status">Caricamento del catalogo…</p></section>;
   else if (path === '/' || path === '/dashboard') view = <Dashboard catalog={catalog} route={route}/>;

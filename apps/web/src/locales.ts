@@ -24,6 +24,7 @@ export const LOCALES = {
   it: {
     'app.name': 'PratoHub',
     'app.subtitle': 'TEXTILE INTELLIGENCE & NETWORK',
+    'nav.home': 'Home',
     'nav.dashboard': 'Dashboard',
     'nav.filiera': 'Filiera',
     'nav.network': 'Network',
@@ -46,6 +47,7 @@ export const LOCALES = {
   en: {
     'app.name': 'PratoHub',
     'app.subtitle': 'TEXTILE INTELLIGENCE & NETWORK',
+    'nav.home': 'Home',
     'nav.dashboard': 'Dashboard',
     'nav.filiera': 'Supply chain',
     'nav.network': 'Network',
@@ -77,7 +79,8 @@ export function t(locale: Locale, key: keyof (typeof LOCALES)['it']): string {
 
 // Vicendelink tra route e chiave di navigazione (usato da Shell).
 export const NAV_KEYS: Record<string, keyof (typeof LOCALES)['it']> = {
-  '/': 'nav.dashboard',
+  '/': 'nav.home',
+  '/dashboard': 'nav.dashboard',
   '/filiera': 'nav.filiera',
   '/network': 'nav.network',
   '/brief': 'nav.brief',

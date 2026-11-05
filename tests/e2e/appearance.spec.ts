@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const root = '/PratoHub/';
-const routes = ['/', '/?mode=demo', '/filiera?node=TX-06.01.01', '/network', '/brief', '/privacy', '/progetto', '/intelligence'];
+const routes = ['/', '/dashboard', '/?mode=demo', '/filiera?node=TX-06.01.01', '/network', '/brief', '/privacy', '/progetto', '/intelligence'];
 
 // Measure painted text against solid ancestor backgrounds, not CSS token names.
 // This is a bounded regression check, not a complete accessibility certification.
@@ -76,7 +76,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
           expect.soft(result.failures, `${colorScheme}, ${width}px, ${route}`).toEqual([]);
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px ${route}`).toBe(true);
           if (width <= 480 && route === '/progetto') {
-            const cards = page.locator('.cards-grid');
+            const cards = page.locator('.ph-feature-grid');
             await expect(cards).toBeVisible();
             expect(await cards.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1);
           }
@@ -84,7 +84,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         expect(runtimeErrors).toEqual([]); expect(failedAssets).toEqual([]);
       });
       test('secondary-button hover and footer keyboard focus remain visible', async ({ page }) => {
-        await page.goto(root);
+        await page.goto(`${root}#/dashboard`);
         const secondary = page.locator('.button-secondary').first();
         await secondary.hover();
         expect((await contrastFailures(page)).failures.filter(failure => failure.includes('button-secondary'))).toEqual([]);
