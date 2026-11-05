@@ -1,10 +1,55 @@
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+build/
+out/
+main-*.css
+
+# Environment
 .env
 .env.*
-!.env.example
-dist/
-coverage/
+.env.local
+.env.*.local
+
+# Logs
+logs/
 *.log
-.playwright-browsers/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Temporary files
+.tmp/
+*.tmp
+*.temp
+.obsidian/
+.claudian/
+.hermes/
+*.base
+Senza nome.base
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# Local/test artifacts
 test-results/
-playwright-report/
+mnt/
+output/
+.playwright-browsers/
+
+# Migration/audit/root artifacts
+fdm-refs-summary.txt
+migration-analysis-report.md
+oc23-runtime-equivalence-review.md
+oc24-migration-execution-playbook.md
+playwright.config.ts
+tests/
+migration-dependency-graph.html
+*.bak-20261105T1253Z
