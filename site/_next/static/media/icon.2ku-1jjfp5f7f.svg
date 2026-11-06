@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PratoTextile">
+  <rect width="64" height="64" fill="#12231f"/>
+  <path d="M12 16h40v8H12zm0 16h40v8H12zm0 16h40v8H12z" fill="#f5f2ea"/>
+  <path d="M16 12v40m16-40v40m16-40v40" stroke="#ba5a3b" stroke-width="4"/>
+</svg>

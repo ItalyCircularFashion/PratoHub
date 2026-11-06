@@ -1,11 +1,10 @@
-name: Deploy GitHub Pages
+name: Deploy PratoTextile GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-# Jobs opt into only the permissions they need.
 permissions: {}
 
 concurrency:
@@ -14,7 +13,6 @@ concurrency:
 
 jobs:
   build:
-    # Manual runs from other refs must not publish an unreviewed branch.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -24,22 +22,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
-      - name: Install locked dependencies without lifecycle scripts
-        run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Build site for the Pages base path
-        env:
-          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-        run: npm run build -- --base "${PAGES_BASE_PATH}/"
-      - name: Upload only the built site
+      - name: Upload verified static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: ./site
 
   deploy:
     needs: build

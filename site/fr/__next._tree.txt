@@ -1,0 +1,4 @@
+:HL["/PratoHub/_next/static/chunks/1yoy_2qy489qo.css","style"]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":{"n":"locale","t":"d","k":"fr","s":[]},"h":96,"c":"$Q2"}]]
+0:{"b":"BZqHi77PK9JuBwIEOfKu3","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
