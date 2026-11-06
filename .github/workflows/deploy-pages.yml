@@ -1,4 +1,4 @@
-name: Deploy PratoTextile GitHub Pages
+name: Deploy PratoHub GitHub Pages
 
 on:
   push:
@@ -22,13 +22,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+      - name: Unit tests
+        run: node --test tests/unit.test.mjs
+      - name: Build verified static site into dist/
+        run: |
+          node scripts/lint.mjs
+          node scripts/build.mjs
+          node scripts/check.mjs
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
       - name: Upload verified static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./site
+          path: ./dist
 
   deploy:
     needs: build

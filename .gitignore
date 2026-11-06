@@ -1,2 +1,11 @@
 .DS_Store
 *.log
+node_modules/
+dist/
+test-results/
+playwright-report/
+.hermes/
+.env
+.env.*
+*.bak*
+*backup*

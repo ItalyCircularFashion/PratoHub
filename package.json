@@ -1,0 +1,16 @@
+{
+  "name": "pratohub-portale",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portale editoriale statico del tessile pratese, con fonti e percorsi permanenti",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "lint": "node scripts/lint.mjs",
+    "test": "node --test tests/unit.test.mjs && node scripts/check.mjs",
+    "test:e2e": "playwright test",
+    "preview": "node scripts/serve.mjs"
+  },
+  "devDependencies": { "@playwright/test": "1.61.1" }
+}

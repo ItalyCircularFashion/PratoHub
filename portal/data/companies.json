@@ -1,0 +1,224 @@
+[
+  {
+    "slug": "filatura-di-spicciano",
+    "name": "Filatura di Spicciano",
+    "category": "filature",
+    "city": "Vaiano",
+    "description": "Filatura cardata a Vaiano che presenta lavorazioni di cardatura e filatura di fibre vergini e rigenerate.",
+    "website": "https://filaturadispicciano.it/",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Attività e comune — sito ufficiale",
+        "url": "https://filaturadispicciano.it/"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "https://filaturadispicciano.it/",
+        "quote": "Filatura di Spicciano srl"
+      },
+      {
+        "url": "https://filaturadispicciano.it/",
+        "quote": "filatura cardata tradizionale"
+      },
+      {
+        "url": "https://filaturadispicciano.it/",
+        "quote": "Grazie alla versatilità del nostro reparto siamo in grado di cardare e filare fibre sia rignerate che vergini."
+      },
+      {
+        "url": "https://filaturadispicciano.it/",
+        "quote": "59021 – Vaiano – PO"
+      }
+    ]
+  },
+  {
+    "slug": "lanificio-fratelli-balli",
+    "name": "Lanificio Fratelli Balli",
+    "category": "tessiture",
+    "city": "Prato",
+    "description": "Lanificio di Prato: il sito presenta la tessitura come fase del proprio ciclo produttivo interno, dal fiocco al tessuto finito.",
+    "website": "https://www.balli.it/it",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Identità commerciale — footer del sito ufficiale",
+        "url": "https://www.balli.it/it"
+      },
+      {
+        "label": "Tessitura nel ciclo produttivo — sito ufficiale",
+        "url": "https://www.balli.it/balli-cycle"
+      },
+      {
+        "label": "Comune — contatti ufficiali",
+        "url": "https://www.balli.it/contatti"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "https://www.balli.it/it",
+        "quote": "LANIFICIO FRATELLI BALLI"
+      },
+      {
+        "url": "https://www.balli.it/balli-cycle",
+        "quote": "Partendo dal fiocco, passando dalla cardatura o dalla pettinatura continuando con la filatura e l'orditura fino ad arrivare alla tessitura e al finissaggio."
+      },
+      {
+        "url": "https://www.balli.it/balli-cycle",
+        "quote": "Il nostro Balli Cycle accorpa in sede tutte le singole fasi produttive in un ciclo verticale che trasforma la materia prima in tessuto finito."
+      },
+      {
+        "url": "https://www.balli.it/contatti",
+        "quote": "Prato (PO) - Italia"
+      }
+    ]
+  },
+  {
+    "slug": "gruppo-colle",
+    "name": "Gruppo Colle",
+    "category": "tintorie",
+    "city": "Cantagallo",
+    "description": "Azienda di Cantagallo che presenta attività di tintura di fibre tessili in fiocco, tops e rocche.",
+    "website": "https://www.gruppocolle.it/it",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Attività di tintura — sito ufficiale",
+        "url": "https://www.gruppocolle.it/it"
+      },
+      {
+        "label": "Comune — contatti ufficiali",
+        "url": "https://www.gruppocolle.it/contatti.php"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "https://www.gruppocolle.it/it",
+        "quote": "Gruppo Colle è, infatti"
+      },
+      {
+        "url": "https://www.gruppocolle.it/it",
+        "quote": "Core business dell’azienda, ci occupiamo di tintura in fiocco, in tops, in rocche"
+      },
+      {
+        "url": "https://www.gruppocolle.it/contatti.php",
+        "quote": "Usella Cantagallo (PO)"
+      }
+    ]
+  },
+  {
+    "slug": "tintoria-cometa",
+    "name": "Tintoria Cometa",
+    "category": "tintorie",
+    "city": "Prato",
+    "description": "Tintoria di Prato dedicata alla nobilitazione dei filati. Il sito distingue le lavorazioni di tintura in rocche e in matasse.",
+    "website": "http://www.tintoriacometa.it/",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Azienda e lavorazioni — sito ufficiale HTTP",
+        "url": "http://www.tintoriacometa.it/azienda.htm"
+      },
+      {
+        "label": "Comune — sito ufficiale HTTP",
+        "url": "http://www.tintoriacometa.it/dovesiamo.htm"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "http://www.tintoriacometa.it/azienda.htm",
+        "quote": "La TINTORIA COMETA si è costituita"
+      },
+      {
+        "url": "http://www.tintoriacometa.it/azienda.htm",
+        "quote": "Operiamo nel campo della nobilitazione dei filati nell’indotto dell’Industria tessile"
+      },
+      {
+        "url": "http://www.tintoriacometa.it/azienda.htm",
+        "quote": "Tintura di filati in rocche."
+      },
+      {
+        "url": "http://www.tintoriacometa.it/azienda.htm",
+        "quote": "Tintura di filati in matasse."
+      },
+      {
+        "url": "http://www.tintoriacometa.it/dovesiamo.htm",
+        "quote": "59100 PRATO"
+      }
+    ]
+  },
+  {
+    "slug": "rifinizione-bp",
+    "name": "Rifinizione B.P.",
+    "category": "rifinizioni",
+    "city": "Prato",
+    "description": "Rifinizione a Prato che presenta lavorazioni di finissaggio per tessuti a navetta e jersey, incluse lavorazioni di follatura.",
+    "website": "https://rifinizionebp.it/",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Identità e attività — sito ufficiale",
+        "url": "https://rifinizionebp.it/chi-siamo/"
+      },
+      {
+        "label": "Finissaggio dei tessuti — sito ufficiale",
+        "url": "https://rifinizionebp.it/finissaggio-e-trattamenti-tessuti-abbigliamento/"
+      },
+      {
+        "label": "Comune — contatti ufficiali",
+        "url": "https://rifinizionebp.it/contatti/"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "https://rifinizionebp.it/chi-siamo/",
+        "quote": "La Rifinizione B.P. Srl"
+      },
+      {
+        "url": "https://rifinizionebp.it/finissaggio-e-trattamenti-tessuti-abbigliamento/",
+        "quote": "L’azienda dispone di un parco macchine legato alla tradizione laniera, sia nel tessuto a navetta che tessuto jersey"
+      },
+      {
+        "url": "https://rifinizionebp.it/finissaggio-e-trattamenti-tessuti-abbigliamento/",
+        "quote": "Follatura in Purgofolla o Cesto"
+      },
+      {
+        "url": "https://rifinizionebp.it/contatti/",
+        "quote": "59100 Prato (RIFINIZIONE)"
+      }
+    ]
+  },
+  {
+    "slug": "rifinizione-santo-stefano",
+    "name": "Santo Stefano",
+    "category": "rifinizioni",
+    "city": "Prato",
+    "description": "Azienda di Prato che descrive un ciclo di lavorazioni comprendente lavaggio, tintura e rifinizione delle stoffe.",
+    "website": "http://www.santostefano.prato.it/",
+    "checkedAt": "2026-11-06",
+    "sources": [
+      {
+        "label": "Attività di rifinizione — sito ufficiale HTTP",
+        "url": "http://www.santostefano.prato.it/"
+      },
+      {
+        "label": "Comune — sito ufficiale HTTP",
+        "url": "http://www.santostefano.prato.it/mappa/"
+      }
+    ],
+    "evidence": [
+      {
+        "url": "http://www.santostefano.prato.it/",
+        "quote": "Santo Stefano opera nei settori più svariati e specialistici con una miriade di reparti:"
+      },
+      {
+        "url": "http://www.santostefano.prato.it/",
+        "quote": "dalla preparazione e folatura delle stoffe, al lavaggio, alla tintura in continuo (pad batch – pad steam) fino al rameuse, alla rifinizione e alle applicazioni speciali"
+      },
+      {
+        "url": "http://www.santostefano.prato.it/mappa/",
+        "quote": "59100 PRATO – ITALY"
+      }
+    ]
+  }
+]
