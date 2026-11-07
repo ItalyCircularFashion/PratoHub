@@ -305,3 +305,43 @@ p { margin-bottom: 1.15rem; }
 .fonti-table thead th { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .fonti-table tbody th { font-weight: 700; white-space: nowrap; }
 .fonti-table td { color: var(--muted); }
+
+/* Quasi-4D: profondita con soli transform/opacity. Gli stati nascosti esistono solo quando JS attivo (.js). */
+.hero-full, .home-section, .community-band, .article-grid, .company-grid, .pillar-grid, .involved-grid, .sector-list { perspective: 1200px; }
+.hero-full { overflow: hidden; position: relative; }
+.hero-orb { position: absolute; border-radius: 50%; filter: blur(2px); pointer-events: none; will-change: transform, opacity; }
+.hero-orb-a { width: 420px; height: 420px; right: -120px; top: -160px; background: radial-gradient(circle, rgba(240,201,160,.34), transparent 68%); animation: ph-float-a 14s ease-in-out infinite alternate; }
+.hero-orb-b { width: 300px; height: 300px; left: -90px; bottom: -140px; background: radial-gradient(circle, rgba(120,180,150,.30), transparent 68%); animation: ph-float-b 18s ease-in-out infinite alternate; }
+.hero-inner { position: relative; z-index: 1; transform-style: preserve-3d; }
+.hero-inner > div:first-child, .hero-panel { transform: translateZ(0); }
+.hero-panel { transform-style: preserve-3d; }
+@keyframes ph-float-a { from { transform: translate3d(0,0,0) scale(1); opacity: .85; } to { transform: translate3d(-26px,30px,60px) scale(1.08); opacity: 1; } }
+@keyframes ph-float-b { from { transform: translate3d(0,0,30px) scale(1); opacity: .8; } to { transform: translate3d(30px,-22px,0) scale(1.10); opacity: 1; } }
+.js .reveal { opacity: 0; transform: translateY(34px) rotateX(10deg) translateZ(-30px); }
+.js .reveal.is-in { opacity: 1; transform: none; transition: opacity .8s ease, transform .8s cubic-bezier(.2,.85,.25,1); }
+.js .reveal-l { opacity: 0; transform: translateX(-42px) rotateY(-10deg); }
+.js .reveal-r { opacity: 0; transform: translateX(42px) rotateY(10deg); }
+.js .reveal-l.is-in, .js .reveal-r.is-in { opacity: 1; transform: none; transition: opacity .8s ease, transform .8s cubic-bezier(.2,.85,.25,1); }
+[data-tilt] { transform-style: preserve-3d; will-change: transform; transition: transform .28s ease, box-shadow .28s ease; }
+[data-tilt]:hover { box-shadow: 0 22px 48px rgba(23,59,44,.22); }
+[data-tilt] > * { transform-style: preserve-3d; }
+[data-magnetic] { will-change: transform; transition: transform .22s ease; }
+.shine { position: relative; overflow: hidden; }
+.shine::after { content: ""; position: absolute; inset: -40%; background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.22), transparent 42%); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+.shine:hover::after { opacity: 1; }
+.trail-dot { position: fixed; z-index: 90; width: 10px; height: 10px; border-radius: 50%; background: var(--clay); opacity: 0; pointer-events: none; will-change: transform, opacity; }
+.trail-dot.alt { background: var(--green-2); }
+@media (max-width: 767.98px) {
+  .hero-full, .home-section, .community-band { perspective: 900px; }
+  .hero-orb-a { width: 260px; height: 260px; }
+  .hero-orb-b { width: 190px; height: 190px; }
+  .trail-dot { width: 8px; height: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-orb, [data-tilt], [data-magnetic] { animation: none !important; transition: none !important; }
+  .js .reveal, .js .reveal-l, .js .reveal-r { opacity: 1 !important; transform: none !important; }
+  .trail-dot { display: none !important; }
+}
+
+/* Evita overflow orizzontale dalle entrate laterali 3D (il contenuto resta raggiungibile via scroll verticale). */
+html.js, html.js body { overflow-x: clip; }
