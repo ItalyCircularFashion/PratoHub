@@ -16410,7 +16410,7 @@ var TubeGeometry = class _TubeGeometry extends BufferGeometry {
     const vertex2 = new Vector3();
     const normal = new Vector3();
     const uv = new Vector2();
-    let P = new Vector3();
+    let P2 = new Vector3();
     const vertices = [];
     const normals = [];
     const uvs = [];
@@ -16429,7 +16429,7 @@ var TubeGeometry = class _TubeGeometry extends BufferGeometry {
       generateIndices();
     }
     function generateSegment(i) {
-      P = path.getPointAt(i / tubularSegments, P);
+      P2 = path.getPointAt(i / tubularSegments, P2);
       const N = frames.normals[i];
       const B = frames.binormals[i];
       for (let j = 0; j <= radialSegments; j++) {
@@ -16441,9 +16441,9 @@ var TubeGeometry = class _TubeGeometry extends BufferGeometry {
         normal.z = cos * N.z + sin * B.z;
         normal.normalize();
         normals.push(normal.x, normal.y, normal.z);
-        vertex2.x = P.x + radius * normal.x;
-        vertex2.y = P.y + radius * normal.y;
-        vertex2.z = P.z + radius * normal.z;
+        vertex2.x = P2.x + radius * normal.x;
+        vertex2.y = P2.y + radius * normal.y;
+        vertex2.z = P2.z + radius * normal.z;
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
       }
     }
@@ -32729,11 +32729,20 @@ function buildFactory() {
     const z = -2.7 + j * 0.24;
     line(loom, [new Vector3(-3.4, -0.3, z), new Vector3(3.4, -0.3, z)], j % 5 === 0 ? 15120775 : 12110015, 0.015);
   }
-  animations.push((t) => {
-    heddleA.position.y = Math.sin(t * 3) * 0.2;
-    heddleB.position.y = -Math.sin(t * 3) * 0.2;
-    reed.position.z = -0.5 + Math.sin(t * 3) * 0.4;
-    shuttle.position.x = Math.sin(t * 2) * 3;
+  animations.push((t, _p, snap) => {
+    if (snap && snap.mechanics) {
+      const m = snap.mechanics;
+      const fo = m.frameOffsets;
+      heddleA.position.y = (fo[0] ?? 0) * 0.64;
+      heddleB.position.y = (fo[1] ?? 0) * 0.64;
+      reed.position.z = -0.5 + m.reed * 0.4;
+      shuttle.position.x = snap.transfer.tip.x;
+    } else {
+      heddleA.position.y = Math.sin(t * 3) * 0.2;
+      heddleB.position.y = -Math.sin(t * 3) * 0.2;
+      reed.position.z = -0.5 + Math.sin(t * 3) * 0.4;
+      shuttle.position.x = Math.sin(t * 2) * 3;
+    }
   });
   const finishing = new Group();
   finishing.position.z = -59;
@@ -32782,8 +32791,8 @@ function buildFactory() {
   });
   for (const x of [-3.3, 3.3]) bar(final, dark, [x, 0, -0.6], [0.15, 6, 0.2]);
   bar(final, metal, [0, 3, -0.6], [7, 0.2, 0.2]);
-  return { root, update: (t, p) => {
-    for (const fn of animations) fn(t, p);
+  return { root, update: (t, p, snap) => {
+    for (const fn of animations) fn(t, p, snap);
   }, dispose: () => {
     for (const g of geometries) g.dispose();
     for (const m of mats) m.dispose();
@@ -32800,9 +32809,315 @@ var stages = [
   { id: "prodotto", number: "06", eyebrow: "IL RISULTATO", title: "Dal processo al prodotto.", description: "Il viaggio termina con il tessuto finito: una sintesi di competenze, lavorazioni e relazioni industriali.", details: ["Tessuto finito", "Filiera", "Made in Prato"], accent: "#b8dfce" }
 ];
 
+// src/loom12/diagnostic-repair.ts
+var plans = {
+  INVALID_TIME: { severity: "recoverable", strategy: "RESTORE_CHECKPOINT", cause: "Non-finite or out-of-bounds timeline coordinate", steps: ["Stop playback", "Restore last validated cycle", "Re-evaluate mechanical invariants"], automatic: true, requiresOperator: false },
+  INVALID_POSE: { severity: "engineering", strategy: "INSPECT_MECHANICS", cause: "Mechanical state invariant violated", steps: ["Freeze production", "Capture failing pose and configuration", "Inspect root cause and validate regression tests"], automatic: false, requiresOperator: true },
+  INVALID_CONFIGURATION: { severity: "engineering", strategy: "VERIFY_CONFIGURATION", cause: "Invalid loom setup", steps: ["Freeze production", "Validate ends, RPM and pick density", "Approve corrected setup before restart"], automatic: false, requiresOperator: true },
+  RENDER_FAILURE: { severity: "recoverable", strategy: "REBUILD_RENDER_RESOURCES", cause: "Rendering exception or GPU resource failure", steps: ["Stop playback", "Release and recreate owned GPU resources via registered callback", "Verify scene and last valid mechanical pose"], automatic: true, requiresOperator: false },
+  WARP_BREAK: { severity: "operator", strategy: "MANUAL_WARP_KNOT", cause: "Warp stop-motion sensor triggered", steps: ["Stop loom", "Locate broken warp end and dropped lamella", "Repair knot and verify sensor", "Restart manually"], automatic: false, requiresOperator: true },
+  TRANSFER_MISMATCH: { severity: "engineering", strategy: "RECALIBRATE_TRANSFER", cause: "Rapier gripper / yarn endpoint constraint mismatch", steps: ["Freeze production", "Check gripper overlap and ownership", "Recalibrate only after geometric verification"], automatic: false, requiresOperator: true }
+};
+function classifyFault(e) {
+  return { id: `${e.code}@${e.cycle.toFixed(4)}`, code: e.code, ...plans[e.code] };
+}
+function validateRecovery(plan, snapshotValid, repairCallbackSucceeded) {
+  const verified = snapshotValid && repairCallbackSucceeded;
+  return { planId: plan.id, ok: verified, verified, reason: verified ? "Post-repair invariants passed" : "Repair verification failed; machine remains locked", cycle: Number(plan.id.split("@")[1]) };
+}
+
+// src/loom12/kinematics.ts
+var clamp2 = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+var smooth = (a, b, x) => {
+  const t = clamp2((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+function lift(end, pick, weave) {
+  if (weave === "plain") return (end + pick) % 2 === 0;
+  if (weave === "basket") return (Math.floor(end / 2) + Math.floor(pick / 2)) % 2 === 0;
+  return ((end - pick) % 4 + 4) % 4 < 2;
+}
+function poseAt(t, c) {
+  const pick = Math.max(0, Math.floor(t)), phase = t - pick;
+  const shed = smooth(0, 0.19, phase) * (1 - smooth(0.69, 0.85, phase));
+  const beat = smooth(0.77, 0.9, phase) * (1 - smooth(0.94, 1, phase));
+  const leftX = -2.45 + 2.45 * smooth(0.18, 0.43, phase) - 2.45 * smooth(0.53, 0.72, phase);
+  const rightX = 2.45 - 2.45 * smooth(0.38, 0.46, phase) + 2.45 * smooth(0.54, 0.74, phase);
+  const transfer = phase >= 0.46 && phase < 0.54;
+  const feed = phase < 0.46 ? (leftX + 2.45) / 4.9 : phase < 0.54 ? 0.5 : (rightX + 2.45) / 4.9;
+  const clothLengthM = t / (c.picksPerCm * 100);
+  const beamRadius = 0.48, takeupRadius = 0.34;
+  return { pick, phase, shed, beat, leftX, rightX, transfer, feed, clothLengthM, beamAngle: -clothLengthM / beamRadius, takeupAngle: clothLengthM / takeupRadius };
+}
+
+// src/loom12/engineering.ts
+var settings = (c) => ({ ...c, endsPerDent: 4, warpBeamCoreRadiusM: 0.22, warpBeamFullRadiusM: 0.48, takeupCoreRadiusM: 0.28, warpLayerThicknessM: 15e-5, clothThicknessM: 42e-5, warpCrimpFactor: 1.04 });
+function liftingPlan(pick, weave) {
+  return [0, 1, 2, 3].map((frame) => weave === "plain" ? frame < 2 && lift(frame, pick, weave) : weave === "basket" ? lift(frame * 2, pick, weave) : lift(frame, pick, weave));
+}
+function productionAt(t, c) {
+  const completedPicks = Math.max(0, Math.floor(t));
+  const producedLengthM = completedPicks / (c.picksPerCm * 100);
+  const theoreticalLengthM = Math.max(0, t) / (c.picksPerCm * 100);
+  const warpConsumedM = producedLengthM * c.warpCrimpFactor;
+  const widthM = 1;
+  const remainingArea = Math.max(Math.PI * c.warpBeamCoreRadiusM ** 2, Math.PI * c.warpBeamFullRadiusM ** 2 - warpConsumedM * c.warpLayerThicknessM / widthM);
+  const warpRadiusM = Math.sqrt(remainingArea / Math.PI);
+  const takeupRadiusM = Math.sqrt(c.takeupCoreRadiusM ** 2 + producedLengthM * c.clothThicknessM / (Math.PI * widthM));
+  const beamAngle = -Math.PI * widthM * (c.warpBeamFullRadiusM ** 2 - warpRadiusM ** 2) / (Math.max(c.warpLayerThicknessM, 1e-9) * Math.max((warpRadiusM + c.warpBeamFullRadiusM) / 2, 1e-9));
+  const takeupAngle = Math.PI * widthM * (takeupRadiusM ** 2 - c.takeupCoreRadiusM ** 2) / (Math.max(c.clothThicknessM, 1e-9) * Math.max((takeupRadiusM + c.takeupCoreRadiusM) / 2, 1e-9));
+  return { completedPicks, producedLengthM, warpConsumedM, theoreticalLengthM, warpRadiusM, takeupRadiusM, beamAngle, takeupAngle };
+}
+function mechanicsAt(t, c) {
+  const q = t - Math.floor(t);
+  const pick = Math.floor(t);
+  const phase = q < 0.18 ? "shed-open" : q < 0.43 ? "carrier-entry" : q < 0.46 ? "centre-overlap" : q < 0.49 ? "receiver-grip" : q < 0.54 ? "carrier-release" : q < 0.77 ? "rapier-exit" : q < 0.94 ? "beat-up" : "take-up";
+  const carrierTipX = -2.45 + 2.45 * smooth(0.18, 0.43, q) - 2.45 * smooth(0.54, 0.72, q);
+  const receiverTipX = 2.45 - 2.45 * smooth(0.38, 0.43, q) + 2.45 * smooth(0.54, 0.74, q);
+  const transferValid = Math.abs(carrierTipX - receiverTipX) < 0.035;
+  const carrierJawClosed = q >= 0.18 && q < 0.54;
+  const receiverJawClosed = q >= 0.46 && q < 0.77;
+  const owner = q < 0.18 ? "none" : q < 0.46 ? "carrier" : q < 0.54 ? "both" : q < 0.77 ? "receiver" : "reed";
+  const shed = smooth(0, 0.18, q) * (1 - smooth(0.7, 0.84, q));
+  const frameOffsets = liftingPlan(pick, c.weave).map((up) => (up ? 1 : -1) * 0.31 * shed);
+  const reed = smooth(0.77, 0.91, q) * (1 - smooth(0.94, 1, q));
+  return { phase, carrierJawClosed, receiverJawClosed, transferValid, carrierTipX, receiverTipX, owner, shed, reed, frameOffsets };
+}
+
+// src/loom12/rapier-transfer.ts
+var P = (x, y, z) => ({ x, y, z });
+function transferFromMechanics(mech, phase) {
+  const owner = mech.owner;
+  const state = phase < 0.18 ? "waiting" : phase < 0.43 ? "carrier-entry" : phase < 0.46 ? "centre-grip" : phase < 0.54 ? "receiver-transfer" : phase < 0.77 ? "rapier-exit" : "beat-up";
+  if (owner === "both" && (!mech.carrierJawClosed || !mech.receiverJawClosed || !mech.transferValid)) throw Error("TRANSFER_MISMATCH: overlapping grippers are not secured");
+  if (owner === "carrier" && !mech.carrierJawClosed) throw Error("TRANSFER_MISMATCH: carrier jaw open");
+  if (owner === "receiver" && !mech.receiverJawClosed) throw Error("TRANSFER_MISMATCH: receiver jaw open");
+  const tipX = owner === "none" ? -2.45 : owner === "carrier" ? mech.carrierTipX : owner === "both" ? (mech.carrierTipX + mech.receiverTipX) / 2 : owner === "receiver" ? mech.receiverTipX : 2.45;
+  const z = 0.95 + 1.125 * mech.reed;
+  const tip = P(tipX, 1.28, z);
+  const points = [P(-3.35, 1.25, 1.43), P(-2.88, 1.55, 1.18), P(-2.54, 1.28, z), tip];
+  let length = 0;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i];
+    length += Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+  }
+  return { state, owner, points, tip, length };
+}
+
+// src/loom12/orchestrator.ts
+var MAX_CYCLE = 120;
+var LoomOrchestrator = class {
+  constructor(config) {
+    this.config = config;
+    this.assertConfig();
+  }
+  config;
+  cycle = 0;
+  mode = "STOPPED";
+  incidents = [];
+  consecutiveResets = 0;
+  fault = null;
+  lastGood = 0;
+  nextIncident = 1;
+  brokenEnd = 0;
+  recoveryChecks = 0;
+  reports = [];
+  renderRecovery = null;
+  get status() {
+    return { cycle: this.cycle, mode: this.mode, fault: this.fault, consecutiveResets: this.consecutiveResets, brokenEnd: this.brokenEnd, recoveryChecks: this.recoveryChecks };
+  }
+  get logs() {
+    return [...this.incidents];
+  }
+  get diagnosticReports() {
+    return this.reports.map((r) => ({ ...r }));
+  }
+  registerRenderRecovery(callback) {
+    this.renderRecovery = callback;
+  }
+  diagnose(code, detail) {
+    const evidence = { code, detail, cycle: this.cycle, subsystem: code === "RENDER_FAILURE" ? "render" : code === "WARP_BREAK" ? "warp" : code === "TRANSFER_MISMATCH" ? "rapier" : "kinematics", recordedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    const report = { evidence, plan: classifyFault(evidence) };
+    this.reports.push(report);
+    return report;
+  }
+  latestReport() {
+    return this.reports[this.reports.length - 1];
+  }
+  assertConfig() {
+    if (!Number.isFinite(this.config.rpm) || this.config.rpm <= 0 || !Number.isFinite(this.config.picksPerCm) || this.config.picksPerCm <= 0 || !Number.isInteger(this.config.ends) || this.config.ends < 2) throw Error("Invalid loom configuration");
+  }
+  evaluate(cycle = this.cycle) {
+    if (!Number.isFinite(cycle) || cycle < 0 || cycle > MAX_CYCLE) throw Error("Invalid cycle");
+    this.assertConfig();
+    const pose = poseAt(cycle, this.config), c = settings(this.config);
+    const mechanics = mechanicsAt(cycle, c), production = productionAt(cycle, c), transfer = transferFromMechanics(mechanics, pose.phase);
+    pose.leftX = mechanics.carrierTipX;
+    pose.rightX = mechanics.receiverTipX;
+    pose.shed = mechanics.shed;
+    pose.beat = mechanics.reed;
+    pose.transfer = mechanics.owner === "both";
+    pose.clothLengthM = production.producedLengthM;
+    pose.beamAngle = production.beamAngle;
+    pose.takeupAngle = production.takeupAngle;
+    const nums = [production.producedLengthM, production.warpRadiusM, production.takeupRadiusM, mechanics.carrierTipX, mechanics.receiverTipX];
+    if (nums.some((v) => !Number.isFinite(v))) throw Error("Non-finite mechanical state");
+    return { cycle, pose, mechanics, production, transfer };
+  }
+  incident(code, detail) {
+    this.diagnose(code, detail);
+    this.fault = code;
+    this.mode = "FAULT";
+    this.incidents.push({ id: this.nextIncident++, code, cycle: this.cycle, attempt: this.consecutiveResets, detail, at: (/* @__PURE__ */ new Date()).toISOString() });
+  }
+  report(code, detail) {
+    if (this.mode === "DIAGNOSIS") return;
+    this.incident(code, detail);
+  }
+  handleRuntimeFailure(detail) {
+    this.incident("RENDER_FAILURE", detail);
+    return this.resetSafely();
+  }
+  check() {
+    try {
+      this.evaluate();
+      this.lastGood = this.cycle;
+      return true;
+    } catch (e) {
+      this.incident("INVALID_POSE", String(e));
+      return false;
+    }
+  }
+  dispatch(action, value) {
+    if (action === "PAUSE") {
+      if (this.mode === "RUNNING") this.mode = "STOPPED";
+      return true;
+    }
+    if (action === "BREAK") {
+      if (this.mode === "DIAGNOSIS") return false;
+      this.brokenEnd = Math.max(0, Math.min(this.config.ends - 1, Math.trunc(value ?? 0)));
+      this.incident("WARP_BREAK", `Warp end ${this.brokenEnd + 1} broken`);
+      return true;
+    }
+    if (action === "REPAIR") {
+      if (this.mode !== "FAULT" || this.fault !== "WARP_BREAK") return false;
+      this.mode = "AWAITING_OPERATOR";
+      return true;
+    }
+    if (action === "RESTART") {
+      if (this.mode !== "AWAITING_OPERATOR") return false;
+      this.fault = null;
+      this.mode = "RUNNING";
+      this.consecutiveResets = 0;
+      return this.check();
+    }
+    if (action === "ACK_DIAGNOSIS") {
+      if (this.mode !== "DIAGNOSIS") return false;
+      const report = this.latestReport();
+      if (!report?.outcome?.verified) return false;
+      this.mode = "STOPPED";
+      this.fault = null;
+      this.consecutiveResets = 0;
+      return this.check();
+    }
+    if (action === "RESET") return this.resetSafely();
+    if (this.mode === "FAULT" || this.mode === "RECOVERING" || this.mode === "DIAGNOSIS" || this.mode === "AWAITING_OPERATOR") return false;
+    if (action === "PLAY") {
+      if (!this.check()) return false;
+      this.mode = "RUNNING";
+      return true;
+    }
+    if (action === "STEP" || action === "BACK" || action === "SEEK") {
+      const next = action === "STEP" ? Math.min(MAX_CYCLE, Math.floor(this.cycle) + 1) : action === "BACK" ? Math.max(0, Math.ceil(this.cycle) - 1) : value;
+      if (next === void 0 || !Number.isFinite(next) || next < 0 || next > MAX_CYCLE) {
+        this.incident("INVALID_TIME", String(next));
+        return false;
+      }
+      this.cycle = next;
+      this.mode = "STOPPED";
+      return this.check();
+    }
+    return false;
+  }
+  tick(dt) {
+    if (this.mode !== "RUNNING") return;
+    if (!Number.isFinite(dt) || dt < 0) {
+      this.incident("INVALID_TIME", String(dt));
+      return;
+    }
+    this.cycle = Math.min(MAX_CYCLE, this.cycle + Math.min(dt, 0.05) * this.config.rpm / 60);
+    if (!this.check()) return;
+    if (this.cycle >= MAX_CYCLE) this.mode = "STOPPED";
+    else if (this.consecutiveResets > 0) {
+      this.recoveryChecks++;
+      if (this.recoveryChecks >= 120) {
+        this.consecutiveResets = 0;
+        this.recoveryChecks = 0;
+      }
+    }
+  }
+  resetSafely() {
+    if (this.mode === "DIAGNOSIS" || this.fault === "WARP_BREAK" || this.mode === "AWAITING_OPERATOR") return false;
+    this.consecutiveResets++;
+    this.mode = "RECOVERING";
+    this.cycle = this.lastGood;
+    this.recoveryChecks = 0;
+    if (this.consecutiveResets >= 3) {
+      this.mode = "DIAGNOSIS";
+      this.incidents.push({ id: this.nextIncident++, code: this.fault ?? "INVALID_POSE", cycle: this.cycle, attempt: 3, detail: "Three consecutive resets: diagnostics and operator intervention required", at: (/* @__PURE__ */ new Date()).toISOString() });
+      return false;
+    }
+    try {
+      const plan = this.latestReport()?.plan;
+      if (!plan?.automatic) {
+        this.mode = "DIAGNOSIS";
+        return false;
+      }
+      const repaired = plan.strategy === "REBUILD_RENDER_RESOURCES" ? this.renderRecovery?.() === true : true;
+      let valid = false;
+      try {
+        this.evaluate();
+        valid = true;
+      } catch {
+      }
+      const outcome = validateRecovery(plan, valid, repaired);
+      const report = this.latestReport();
+      if (report) report.outcome = outcome;
+      if (!outcome.ok) {
+        this.mode = "DIAGNOSIS";
+        return false;
+      }
+      this.fault = null;
+      this.mode = "STOPPED";
+      return true;
+    } catch (e) {
+      this.incident("INVALID_POSE", `Reset failed: ${String(e)}`);
+      return false;
+    }
+  }
+  /** Operator authorization is never equivalent to an automatic code repair. Requires verified invariant checks. */
+  verifyOperatorRepair(approved, externalCheck = () => false) {
+    if (this.mode !== "DIAGNOSIS" || !approved) return false;
+    let valid = false;
+    try {
+      this.evaluate();
+      valid = externalCheck();
+    } catch {
+    }
+    const report = this.latestReport();
+    if (!report) return false;
+    report.outcome = validateRecovery(report.plan, valid, true);
+    return report.outcome.verified;
+  }
+  diagnostics() {
+    const recent = this.incidents.slice(-10);
+    return { mode: this.mode, lastGoodCycle: this.lastGood, attempts: this.consecutiveResets, recent, reports: this.diagnosticReports.slice(-10), advice: this.mode === "DIAGNOSIS" ? "Inspect input configuration, last fault and component invariants; repair source offline, run tests, then acknowledge. No automatic code mutation." : "Monitor and validate before resuming." };
+  }
+};
+
 // src/world/engine.ts
-var clamp2 = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-var smooth = (t) => t * t * (3 - 2 * t);
+var clamp3 = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+var smooth2 = (t) => t * t * (3 - 2 * t);
 var waypoints = [new Vector3(0, 0.1, 13), new Vector3(-0.3, 0.25, -8), new Vector3(0, 0.5, -24), new Vector3(0, 0.15, -39), new Vector3(0, 0.8, -55), new Vector3(0, 0.2, -69)];
 var WorldEngine = class {
   constructor(canvas, onStage) {
@@ -32833,6 +33148,7 @@ var WorldEngine = class {
     }, { threshold: 0 });
     this.observer.observe(canvas);
     this.loadMachines();
+    this.orch.dispatch("PLAY");
     this.tick();
   }
   canvas;
@@ -32852,6 +33168,8 @@ var WorldEngine = class {
   machines = /* @__PURE__ */ new Map();
   visible = true;
   observer;
+  orch = new LoomOrchestrator({ ends: 110, picksPerCm: 12, rpm: 180, weave: "plain" });
+  snap = null;
   async loadMachines() {
     const specs = [
       { file: "spinner.glb", stage: 1, z: -12, scale: 1 },
@@ -32884,7 +33202,7 @@ var WorldEngine = class {
   poseMachines(p) {
     const scaled = p * (stageCount() - 1);
     this.machines.forEach((m, i) => {
-      const local = clamp2((scaled - (i - 1) + 1) * 0.8);
+      const local = clamp3((scaled - (i - 1) + 1) * 0.8);
       if (m.rotor) m.rotor.rotation.y = local * Math.PI * 16;
       if (m.shuttle) m.shuttle.position.x = Math.sin(local * Math.PI * 12) * 1.8;
       if (m.heddle) m.heddle.position.y = Math.sin(local * Math.PI * 12) * 0.28;
@@ -32903,7 +33221,7 @@ var WorldEngine = class {
     this.renderer.setSize(w, h, false);
   }
   setProgress(value) {
-    this.target = clamp2(value);
+    this.target = clamp3(value);
   }
   tick = () => {
     if (this.disposed) return;
@@ -32916,14 +33234,21 @@ var WorldEngine = class {
     this.progress += (this.target - this.progress) * (1 - Math.exp(-delta * 7));
     const f = this.progress * (waypoints.length - 1);
     const index = Math.min(Math.floor(f), waypoints.length - 2);
-    const alpha = smooth(f - index);
+    const alpha = smooth2(f - index);
     this.camera.position.lerpVectors(waypoints[index], waypoints[index + 1], alpha);
     this.camera.position.x += this.pointer.x * 0.12;
     this.camera.position.y += this.pointer.y * -0.07;
     const lookZ = this.camera.position.z - 9;
     this.camera.lookAt(this.pointer.x * 0.4, 0.05, lookZ);
     this.camera.rotation.z = Math.sin(this.progress * Math.PI * 5) * 0.018;
-    this.factory.update(t, this.progress);
+    try {
+      const cyc = this.progress * 120;
+      this.orch.dispatch("SEEK", cyc);
+      this.snap = this.orch.evaluate(cyc);
+    } catch {
+      this.snap = null;
+    }
+    this.factory.update(t, this.progress, this.snap);
     this.poseMachines(this.progress);
     this.renderer.render(this.scene, this.camera);
     this.onStage(Math.min(Math.floor(this.progress * stages.length), stages.length - 1));
