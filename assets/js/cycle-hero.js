@@ -33242,14 +33242,12 @@ var WorldEngine = class {
     ];
     for (const s of specs) {
       try {
-        const candidates = [`cycle/models/${s.file}`, `models/${s.file}`, `/PratoHub/cycle/models/${s.file}`, `${import.meta.env?.BASE_URL || "./"}models/${s.file}`];
+        const inCycle = location.pathname.includes("/cycle/");
+        const url = inCycle ? `models/${s.file}` : `cycle/models/${s.file}`;
         let gltf = null;
-        for (const c of candidates) {
-          try {
-            gltf = await this.loader.loadAsync(c);
-            break;
-          } catch {
-          }
+        try {
+          gltf = await this.loader.loadAsync(url);
+        } catch {
         }
         if (!gltf) throw new Error("GLB miss " + s.file);
         if (this.disposed) break;
@@ -33388,7 +33386,15 @@ function initCycleHero(canvas) {
     engine.setProgress(atTop ? auto : sp);
   };
   const loop = setInterval(tick, 120);
-  addEventListener("pagehide", () => clearInterval(loop), { once: true });
+  let heroVisible = true;
+  new IntersectionObserver(([e]) => heroVisible = e.isIntersecting).observe(heroEl || document.body);
+  const tickVisible = () => {
+    if (!heroVisible) return;
+    tick();
+  };
+  const loop2 = setInterval(tickVisible, 120);
+  clearInterval(loop);
+  addEventListener("pagehide", () => clearInterval(loop2), { once: true });
   return engine;
 }
 if (typeof document !== "undefined") {

@@ -1,0 +1,10 @@
+{
+  "name": "pratohub-static",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8818 --bind 127.0.0.1"
+  },
+  "note": "Studio vanilla statico + ciclo derivato da pratohub-cycle (World04) + loom12 src in bundle. Sorgenti TS in pratohub-cycle fuori repo; build cycle via Vite7."
+}
