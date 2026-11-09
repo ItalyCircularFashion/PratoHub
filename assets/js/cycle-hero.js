@@ -5024,9 +5024,9 @@ var Box3 = class {
    * @param {Box3} box - The box to copy.
    * @return {Box3} A reference to this bounding box.
    */
-  copy(box) {
-    this.min.copy(box.min);
-    this.max.copy(box.max);
+  copy(box2) {
+    this.min.copy(box2.min);
+    this.max.copy(box2.max);
     return this;
   }
   /**
@@ -5169,8 +5169,8 @@ var Box3 = class {
    * @param {Box3} box - The bounding box to test.
    * @return {boolean} Whether the bounding box contains the given bounding box or not.
    */
-  containsBox(box) {
-    return this.min.x <= box.min.x && box.max.x <= this.max.x && this.min.y <= box.min.y && box.max.y <= this.max.y && this.min.z <= box.min.z && box.max.z <= this.max.z;
+  containsBox(box2) {
+    return this.min.x <= box2.min.x && box2.max.x <= this.max.x && this.min.y <= box2.min.y && box2.max.y <= this.max.y && this.min.z <= box2.min.z && box2.max.z <= this.max.z;
   }
   /**
    * Returns a point as a proportion of this box's width, height and depth.
@@ -5192,8 +5192,8 @@ var Box3 = class {
    * @param {Box3} box - The bounding box to test.
    * @return {boolean} Whether the given bounding box intersects with this bounding box.
    */
-  intersectsBox(box) {
-    return box.max.x >= this.min.x && box.min.x <= this.max.x && box.max.y >= this.min.y && box.min.y <= this.max.y && box.max.z >= this.min.z && box.min.z <= this.max.z;
+  intersectsBox(box2) {
+    return box2.max.x >= this.min.x && box2.min.x <= this.max.x && box2.max.y >= this.min.y && box2.min.y <= this.max.y && box2.max.z >= this.min.z && box2.min.z <= this.max.z;
   }
   /**
    * Returns `true` if the given bounding sphere intersects with this bounding box.
@@ -5338,9 +5338,9 @@ var Box3 = class {
    * @param {Box3} box - The bounding box to intersect with.
    * @return {Box3} A reference to this bounding box.
    */
-  intersect(box) {
-    this.min.max(box.min);
-    this.max.min(box.max);
+  intersect(box2) {
+    this.min.max(box2.min);
+    this.max.min(box2.max);
     if (this.isEmpty()) this.makeEmpty();
     return this;
   }
@@ -5352,9 +5352,9 @@ var Box3 = class {
    * @param {Box3} box - The bounding box that will be unioned with this instance.
    * @return {Box3} A reference to this bounding box.
    */
-  union(box) {
-    this.min.min(box.min);
-    this.max.max(box.max);
+  union(box2) {
+    this.min.min(box2.min);
+    this.max.max(box2.max);
     return this;
   }
   /**
@@ -5394,8 +5394,8 @@ var Box3 = class {
    * @param {Box3} box - The box to test for equality.
    * @return {boolean} Whether this bounding box is equal with the given one.
    */
-  equals(box) {
-    return box.min.equals(this.min) && box.max.equals(this.max);
+  equals(box2) {
+    return box2.min.equals(this.min) && box2.max.equals(this.max);
   }
   /**
    * Returns a serialized structure of the bounding box.
@@ -5575,8 +5575,8 @@ var Sphere = class {
    * @param {Box3} box - The box to test.
    * @return {boolean} Whether this sphere intersects with the given box or not.
    */
-  intersectsBox(box) {
-    return box.intersectsSphere(this);
+  intersectsBox(box2) {
+    return box2.intersectsSphere(this);
   }
   /**
    * Returns `true` if this sphere intersects with the given plane.
@@ -5993,33 +5993,33 @@ var Ray = class {
    * @param {Vector3} target - The target vector that is used to store the method's result.
    * @return {?Vector3} The intersection point.
    */
-  intersectBox(box, target) {
+  intersectBox(box2, target) {
     let tmin, tmax, tymin, tymax, tzmin, tzmax;
     const invdirx = 1 / this.direction.x, invdiry = 1 / this.direction.y, invdirz = 1 / this.direction.z;
     const origin = this.origin;
     if (invdirx >= 0) {
-      tmin = (box.min.x - origin.x) * invdirx;
-      tmax = (box.max.x - origin.x) * invdirx;
+      tmin = (box2.min.x - origin.x) * invdirx;
+      tmax = (box2.max.x - origin.x) * invdirx;
     } else {
-      tmin = (box.max.x - origin.x) * invdirx;
-      tmax = (box.min.x - origin.x) * invdirx;
+      tmin = (box2.max.x - origin.x) * invdirx;
+      tmax = (box2.min.x - origin.x) * invdirx;
     }
     if (invdiry >= 0) {
-      tymin = (box.min.y - origin.y) * invdiry;
-      tymax = (box.max.y - origin.y) * invdiry;
+      tymin = (box2.min.y - origin.y) * invdiry;
+      tymax = (box2.max.y - origin.y) * invdiry;
     } else {
-      tymin = (box.max.y - origin.y) * invdiry;
-      tymax = (box.min.y - origin.y) * invdiry;
+      tymin = (box2.max.y - origin.y) * invdiry;
+      tymax = (box2.min.y - origin.y) * invdiry;
     }
     if (tmin > tymax || tymin > tmax) return null;
     if (tymin > tmin || isNaN(tmin)) tmin = tymin;
     if (tymax < tmax || isNaN(tmax)) tmax = tymax;
     if (invdirz >= 0) {
-      tzmin = (box.min.z - origin.z) * invdirz;
-      tzmax = (box.max.z - origin.z) * invdirz;
+      tzmin = (box2.min.z - origin.z) * invdirz;
+      tzmax = (box2.max.z - origin.z) * invdirz;
     } else {
-      tzmin = (box.max.z - origin.z) * invdirz;
-      tzmax = (box.min.z - origin.z) * invdirz;
+      tzmin = (box2.max.z - origin.z) * invdirz;
+      tzmax = (box2.min.z - origin.z) * invdirz;
     }
     if (tmin > tzmax || tzmin > tmax) return null;
     if (tzmin > tmin || tmin !== tmin) tmin = tzmin;
@@ -6033,8 +6033,8 @@ var Ray = class {
    * @param {Box3} box - The box to intersect.
    * @return {boolean} Whether this ray intersects with the given box or not.
    */
-  intersectsBox(box) {
-    return this.intersectBox(box, _vector$a) !== null;
+  intersectsBox(box2) {
+    return this.intersectBox(box2, _vector$a) !== null;
   }
   /**
    * Intersects this ray with the given triangle, returning the intersection
@@ -8797,8 +8797,8 @@ var Triangle = class _Triangle {
    * @param {Box3} box - The box to intersect.
    * @return {boolean} Whether this triangle intersects with the given box or not.
    */
-  intersectsBox(box) {
-    return box.intersectsTriangle(this);
+  intersectsBox(box2) {
+    return box2.intersectsTriangle(this);
   }
   /**
    * Returns the closest point on the triangle to the given point.
@@ -13999,8 +13999,8 @@ var Plane = class {
    * @param {Box3} box - The bounding box to test.
    * @return {boolean} Whether the given bounding box intersects with the plane or not.
    */
-  intersectsBox(box) {
-    return box.intersectsPlane(this);
+  intersectsBox(box2) {
+    return box2.intersectsPlane(this);
   }
   /**
    * Returns `true` if the given bounding sphere intersects with the plane.
@@ -14210,13 +14210,13 @@ var Frustum = class {
    * @param {Box3} box - The bounding box to test.
    * @return {boolean} Whether the bounding box is intersecting this frustum or not.
    */
-  intersectsBox(box) {
+  intersectsBox(box2) {
     const planes = this.planes;
     for (let i = 0; i < 6; i++) {
       const plane = planes[i];
-      _vector$6.x = plane.normal.x > 0 ? box.max.x : box.min.x;
-      _vector$6.y = plane.normal.y > 0 ? box.max.y : box.min.y;
-      _vector$6.z = plane.normal.z > 0 ? box.max.z : box.min.z;
+      _vector$6.x = plane.normal.x > 0 ? box2.max.x : box2.min.x;
+      _vector$6.y = plane.normal.y > 0 ? box2.max.y : box2.min.y;
+      _vector$6.z = plane.normal.z > 0 ? box2.max.z : box2.min.z;
       if (plane.distanceToPoint(_vector$6) < 0) {
         return false;
       }
@@ -14678,126 +14678,6 @@ var ExternalTexture = class extends Texture {
     super.copy(source);
     this.sourceTexture = source.sourceTexture;
     return this;
-  }
-};
-var CapsuleGeometry = class _CapsuleGeometry extends BufferGeometry {
-  /**
-   * Constructs a new capsule geometry.
-   *
-   * @param {number} [radius=1] - Radius of the capsule.
-   * @param {number} [height=1] - Height of the middle section.
-   * @param {number} [capSegments=4] - Number of curve segments used to build each cap.
-   * @param {number} [radialSegments=8] - Number of segmented faces around the circumference of the capsule. Must be an integer >= 3.
-   * @param {number} [heightSegments=1] - Number of rows of faces along the height of the middle section. Must be an integer >= 1.
-   */
-  constructor(radius = 1, height = 1, capSegments = 4, radialSegments = 8, heightSegments = 1) {
-    super();
-    this.type = "CapsuleGeometry";
-    this.parameters = {
-      radius,
-      height,
-      capSegments,
-      radialSegments,
-      heightSegments
-    };
-    height = Math.max(0, height);
-    capSegments = Math.max(1, Math.floor(capSegments));
-    radialSegments = Math.max(3, Math.floor(radialSegments));
-    heightSegments = Math.max(1, Math.floor(heightSegments));
-    const indices = [];
-    const vertices = [];
-    const normals = [];
-    const uvs = [];
-    const halfHeight = height / 2;
-    const capArcLength = Math.PI / 2 * radius;
-    const cylinderPartLength = height;
-    const totalArcLength = 2 * capArcLength + cylinderPartLength;
-    const numVerticalSegments = capSegments * 2 + heightSegments;
-    const verticesPerRow = radialSegments + 1;
-    const normal = new Vector3();
-    const vertex2 = new Vector3();
-    for (let iy = 0; iy <= numVerticalSegments; iy++) {
-      let currentArcLength = 0;
-      let profileY = 0;
-      let profileRadius = 0;
-      let normalYComponent = 0;
-      if (iy <= capSegments) {
-        const segmentProgress = iy / capSegments;
-        const angle = segmentProgress * Math.PI / 2;
-        profileY = -halfHeight - radius * Math.cos(angle);
-        profileRadius = radius * Math.sin(angle);
-        normalYComponent = -radius * Math.cos(angle);
-        currentArcLength = segmentProgress * capArcLength;
-      } else if (iy <= capSegments + heightSegments) {
-        const segmentProgress = (iy - capSegments) / heightSegments;
-        profileY = -halfHeight + segmentProgress * height;
-        profileRadius = radius;
-        normalYComponent = 0;
-        currentArcLength = capArcLength + segmentProgress * cylinderPartLength;
-      } else {
-        const segmentProgress = (iy - capSegments - heightSegments) / capSegments;
-        const angle = segmentProgress * Math.PI / 2;
-        profileY = halfHeight + radius * Math.sin(angle);
-        profileRadius = radius * Math.cos(angle);
-        normalYComponent = radius * Math.sin(angle);
-        currentArcLength = capArcLength + cylinderPartLength + segmentProgress * capArcLength;
-      }
-      const v = Math.max(0, Math.min(1, currentArcLength / totalArcLength));
-      let uOffset = 0;
-      if (iy === 0) {
-        uOffset = 0.5 / radialSegments;
-      } else if (iy === numVerticalSegments) {
-        uOffset = -0.5 / radialSegments;
-      }
-      for (let ix = 0; ix <= radialSegments; ix++) {
-        const u = ix / radialSegments;
-        const theta = u * Math.PI * 2;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-        vertex2.x = -profileRadius * cosTheta;
-        vertex2.y = profileY;
-        vertex2.z = profileRadius * sinTheta;
-        vertices.push(vertex2.x, vertex2.y, vertex2.z);
-        normal.set(
-          -profileRadius * cosTheta,
-          normalYComponent,
-          profileRadius * sinTheta
-        );
-        normal.normalize();
-        normals.push(normal.x, normal.y, normal.z);
-        uvs.push(u + uOffset, v);
-      }
-      if (iy > 0) {
-        const prevIndexRow = (iy - 1) * verticesPerRow;
-        for (let ix = 0; ix < radialSegments; ix++) {
-          const i1 = prevIndexRow + ix;
-          const i2 = prevIndexRow + ix + 1;
-          const i3 = iy * verticesPerRow + ix;
-          const i4 = iy * verticesPerRow + ix + 1;
-          indices.push(i1, i2, i3);
-          indices.push(i2, i4, i3);
-        }
-      }
-    }
-    this.setIndex(indices);
-    this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-    this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
-    this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
-  }
-  copy(source) {
-    super.copy(source);
-    this.parameters = Object.assign({}, source.parameters);
-    return this;
-  }
-  /**
-   * Factory method for creating an instance of this class from the given
-   * JSON object.
-   *
-   * @param {Object} data - A JSON object representing the serialized geometry.
-   * @return {CapsuleGeometry} A new instance.
-   */
-  static fromJSON(data) {
-    return new _CapsuleGeometry(data.radius, data.height, data.capSegments, data.radialSegments, data.heightSegments);
   }
 };
 var CylinderGeometry = class _CylinderGeometry extends BufferGeometry {
@@ -32521,20 +32401,20 @@ var GLTFParser = class {
 };
 function computeBounds(geometry, primitiveDef, parser) {
   const attributes = primitiveDef.attributes;
-  const box = new Box3();
+  const box2 = new Box3();
   if (attributes.POSITION !== void 0) {
     const accessor = parser.json.accessors[attributes.POSITION];
     const min = accessor.min;
     const max = accessor.max;
     if (min !== void 0 && max !== void 0) {
-      box.set(
+      box2.set(
         new Vector3(min[0], min[1], min[2]),
         new Vector3(max[0], max[1], max[2])
       );
       if (accessor.normalized) {
         const boxScale = getNormalizedComponentScale(WEBGL_COMPONENT_TYPES[accessor.componentType]);
-        box.min.multiplyScalar(boxScale);
-        box.max.multiplyScalar(boxScale);
+        box2.min.multiplyScalar(boxScale);
+        box2.max.multiplyScalar(boxScale);
       }
     } else {
       console.warn("THREE.GLTFLoader: Missing min/max properties for accessor POSITION.");
@@ -32567,12 +32447,12 @@ function computeBounds(geometry, primitiveDef, parser) {
         }
       }
     }
-    box.expandByVector(maxDisplacement);
+    box2.expandByVector(maxDisplacement);
   }
-  geometry.boundingBox = box;
+  geometry.boundingBox = box2;
   const sphere = new Sphere();
-  box.getCenter(sphere.center);
-  sphere.radius = box.min.distanceTo(box.max) / 2;
+  box2.getCenter(sphere.center);
+  sphere.radius = box2.min.distanceTo(box2.max) / 2;
   geometry.boundingSphere = sphere;
 }
 function addPrimitiveAttributes(geometry, primitiveDef, parser) {
@@ -32603,6 +32483,230 @@ function addPrimitiveAttributes(geometry, primitiveDef, parser) {
     return primitiveDef.targets !== void 0 ? addMorphTargets(geometry, primitiveDef.targets, parser) : geometry;
   });
 }
+
+// src/loom12/kinematics.ts
+var clamp2 = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+var smooth = (a, b, x) => {
+  const t = clamp2((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+function lift(end, pick, weave) {
+  if (weave === "plain") return (end + pick) % 2 === 0;
+  if (weave === "basket") return (Math.floor(end / 2) + Math.floor(pick / 2)) % 2 === 0;
+  return ((end - pick) % 4 + 4) % 4 < 2;
+}
+function poseAt(t, c) {
+  const pick = Math.max(0, Math.floor(t)), phase = t - pick;
+  const shed = smooth(0, 0.19, phase) * (1 - smooth(0.69, 0.85, phase));
+  const beat = smooth(0.77, 0.9, phase) * (1 - smooth(0.94, 1, phase));
+  const leftX = -2.45 + 2.45 * smooth(0.18, 0.43, phase) - 2.45 * smooth(0.53, 0.72, phase);
+  const rightX = 2.45 - 2.45 * smooth(0.38, 0.46, phase) + 2.45 * smooth(0.54, 0.74, phase);
+  const transfer = phase >= 0.46 && phase < 0.54;
+  const feed = phase < 0.46 ? (leftX + 2.45) / 4.9 : phase < 0.54 ? 0.5 : (rightX + 2.45) / 4.9;
+  const clothLengthM = t / (c.picksPerCm * 100);
+  const beamRadius = 0.48, takeupRadius = 0.34;
+  return { pick, phase, shed, beat, leftX, rightX, transfer, feed, clothLengthM, beamAngle: -clothLengthM / beamRadius, takeupAngle: clothLengthM / takeupRadius };
+}
+
+// src/world/loom-final.ts
+var M = {
+  steel: new MeshStandardMaterial({ color: 5662583, metalness: 0.75, roughness: 0.32 }),
+  dark: new MeshStandardMaterial({ color: 1779506, metalness: 0.65, roughness: 0.42 }),
+  brass: new MeshStandardMaterial({ color: 13476972, metalness: 0.75, roughness: 0.3 }),
+  yarnA: new MeshStandardMaterial({ color: 14272682, roughness: 0.82, side: DoubleSide }),
+  yarnB: new MeshStandardMaterial({ color: 7846331, roughness: 0.78, side: DoubleSide }),
+  wood: new MeshStandardMaterial({ color: 7359283, roughness: 0.64 }),
+  cloth: new MeshStandardMaterial({ color: 11982283, roughness: 0.8, side: DoubleSide })
+};
+var box = (parent, w, h, d, x, y, z, mat) => {
+  const o = new Mesh(new BoxGeometry(w, h, d), mat);
+  o.position.set(x, y, z);
+  o.castShadow = true;
+  o.receiveShadow = true;
+  parent.add(o);
+  return o;
+};
+var cyl = (parent, r, length, x, y, z, mat, axis = "x") => {
+  const o = new Mesh(new CylinderGeometry(r, r, length, 24), mat);
+  if (axis === "x") o.rotation.z = Math.PI / 2;
+  if (axis === "z") o.rotation.x = Math.PI / 2;
+  o.position.set(x, y, z);
+  o.castShadow = true;
+  o.receiveShadow = true;
+  parent.add(o);
+  return o;
+};
+var strand = (parent, points, radius, mat) => {
+  const curve = new CatmullRomCurve3(points);
+  const mesh2 = new Mesh(new TubeGeometry(curve, Math.max(8, points.length * 5), radius, 5, false), mat);
+  parent.add(mesh2);
+  return mesh2;
+};
+var LoomFinal = class {
+  root = new Group();
+  groups = {};
+  heddleA = new Group();
+  heddleB = new Group();
+  reedPivot = new Group();
+  shuttle = new Group();
+  warpLines = [];
+  rollers = [];
+  clothMesh;
+  yarnTrail;
+  constructor() {
+    this.root.name = "LOOM_FINAL";
+    for (const k of ["frame", "warp", "heddles", "reed", "shuttle", "cloth", "rollers"]) {
+      this.groups[k] = new Group();
+      this.groups[k].name = k;
+      this.root.add(this.groups[k]);
+    }
+    this.build();
+  }
+  build() {
+    const f = this.groups.frame;
+    for (const x of [-3.4, 3.4]) {
+      for (const z of [-3, 3]) box(f, 0.22, 3.3, 0.24, x, 0.6, z, M.steel);
+      box(f, 0.3, 0.16, 6.3, x, 2.25, 0, M.dark);
+      box(f, 0.32, 0.16, 6.4, x, -0.95, 0, M.dark);
+    }
+    for (const z of [-2.85, 2.85]) {
+      box(f, 7.1, 0.16, 0.24, 0, 2.2, z, M.steel);
+      box(f, 7.1, 0.16, 0.22, 0, -0.85, z, M.dark);
+    }
+    for (let i = 0; i < 9; i++) {
+      const x = -3.1 + i * 0.78;
+      box(f, 0.06, 0.08, 6, x, -0.9, 0, M.brass);
+    }
+    const rollerGroup = this.groups.rollers;
+    for (const [y, z, r] of [[0.18, -2.85, 0.36], [-0.12, 2.65, 0.3], [0.05, 3.1, 0.27]]) {
+      const o = cyl(rollerGroup, r, 6.5, 0, y, z, M.wood);
+      this.rollers.push(o);
+      for (const x of [-3.18, 3.18]) cyl(rollerGroup, r * 1.16, 0.13, x, y, z, M.brass);
+    }
+    const warp = this.groups.warp;
+    const N = 64;
+    for (let i = 0; i < N; i++) {
+      const x = (i / (N - 1) - 0.5) * 5.8;
+      const pts = [new Vector3(x, 0.3, -2.95), new Vector3(x, 0.32, -1.25), new Vector3(x, 0.3, 0.2), new Vector3(x, 0.17, 1.3), new Vector3(x, 0.06, 2.3)];
+      const geom = new BufferGeometry().setFromPoints(pts);
+      const line2 = new Line(geom, new LineBasicMaterial({ color: i % 2 ? 13023392 : 15326665, transparent: true, opacity: 0.87 }));
+      warp.add(line2);
+      this.warpLines.push(line2);
+    }
+    for (const [j, g] of [this.heddleA, this.heddleB].entries()) {
+      g.name = j === 0 ? "heddle_even" : "heddle_odd";
+      g.position.z = j === 0 ? -0.85 : -0.55;
+      this.groups.heddles.add(g);
+      box(g, 6.2, 0.11, 0.12, 0, 0.95, 0, M.brass);
+      box(g, 6.2, 0.11, 0.12, 0, -0.48, 0, M.brass);
+      for (let i = j; i < N; i += 2) {
+        const x = (i / (N - 1) - 0.5) * 5.8;
+        box(g, 0.018, 1.4, 0.025, x, 0.24, 0, M.steel);
+        cyl(g, 0.045, 0.035, x, 0.24, 0, M.brass, "z");
+      }
+    }
+    const reed = this.groups.reed;
+    this.reedPivot.position.set(0, -0.62, 1.15);
+    reed.add(this.reedPivot);
+    box(this.reedPivot, 6.6, 0.15, 0.2, 0, 1.55, 0, M.brass);
+    box(this.reedPivot, 6.6, 0.15, 0.2, 0, 0.26, 0, M.brass);
+    for (let i = 0; i < 80; i++) box(this.reedPivot, 0.016, 1.25, 0.035, (i / 79 - 0.5) * 6.2, 0.92, 0, M.steel);
+    this.groups.shuttle.add(this.shuttle);
+    this.shuttle.position.set(-2.8, 0.3, 0.85);
+    const body = box(this.shuttle, 0.68, 0.15, 0.27, 0, 0, 0, M.wood);
+    body.rotation.y = 0.06;
+    for (const x of [-0.38, 0.38]) {
+      const tip = new Mesh(new ConeGeometry(0.13, 0.33, 4), M.brass);
+      tip.rotation.z = x < 0 ? Math.PI / 2 : -Math.PI / 2;
+      tip.position.x = x;
+      this.shuttle.add(tip);
+    }
+    cyl(this.shuttle, 0.055, 0.28, 0, 0.12, 0, M.yarnB, "z");
+    this.yarnTrail = strand(this.shuttle, [new Vector3(0, 0.08, 0), new Vector3(-0.3, 0.08, 0.03), new Vector3(-0.58, 0.05, 0.05)], 0.018, M.yarnB);
+    const cloth = this.groups.cloth;
+    const rows = 48, cols = 64;
+    const positions = [];
+    const indices = [];
+    for (let j = 0; j <= rows; j++) {
+      const z = 1.45 + j / rows * 1.15;
+      for (let i = 0; i <= cols; i++) {
+        const x = (i / cols - 0.5) * 5.8;
+        const y = 0.075 + Math.sin(i * 0.55 + j * 0.6) * 0.012;
+        positions.push(x, y, z);
+      }
+    }
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const a = j * (cols + 1) + i, b = a + 1, c = a + cols + 1, d = c + 1;
+      indices.push(a, c, b, b, c, d);
+    }
+    const geo = new BufferGeometry();
+    geo.setAttribute("position", new Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    this.clothMesh = new Mesh(geo, M.cloth);
+    this.clothMesh.receiveShadow = true;
+    cloth.add(this.clothMesh);
+    for (let i = 0; i < 32; i++) {
+      const x = (i / 31 - 0.5) * 5.8;
+      const pts = [];
+      for (let j = 0; j <= 24; j++) {
+        const z = 1.47 + j / 24 * 1.07;
+        pts.push(new Vector3(x, 0.09 + (j % 2 ? 0.018 : -0.018), z));
+      }
+      strand(cloth, pts, 0.012, i % 2 ? M.yarnA : M.yarnB);
+    }
+    for (let j = 0; j < 20; j++) {
+      const z = 1.49 + j / 19 * 1.07;
+      const pts = [];
+      for (let i = 0; i <= 32; i++) {
+        const x = (i / 32 - 0.5) * 5.8;
+        pts.push(new Vector3(x, 0.105 + (i % 2 ? 0.018 : -0.018), z));
+      }
+      strand(cloth, pts, 0.012, j % 2 ? M.yarnB : M.yarnA);
+    }
+  }
+  // Pose unica: snapshot Loom12 se presente, altrimenti p (progress 0..1) stile 07
+  pose(p, snap) {
+    if (snap && snap.mechanics) {
+      const m = snap.mechanics;
+      const fo = m.frameOffsets;
+      const roof = (k) => fo[Math.min(fo.length - 1, Math.max(0, k))] ?? 0;
+      this.heddleA.position.y = (roof(0) + roof(2)) / 2 * 0.64;
+      this.heddleB.position.y = (roof(1) + roof(3)) / 2 * 0.64;
+      this.reedPivot.rotation.x = (0.06 + m.reed * 0.23) * smooth(0.36, 0.48, p);
+      const tipX = snap.transfer.tip.x;
+      this.shuttle.position.x = -2.8 + (tipX + 2.45) / 4.9 * 5.6;
+      this.shuttle.position.y = 0.3 + smooth(0.23, 0.33, p) * 0.1;
+      this.rollers.forEach((r, i) => r.rotation.y = p * 1.9 * (i % 2 ? -1 : 1));
+      const grow = smooth(0.65, 0.86, p);
+      this.groups.cloth.scale.z = 0.12 + 0.88 * grow;
+      this.groups.cloth.position.z = 2.3 * (1 - grow);
+      this.warpLines.forEach((l) => l.visible = p < 0.98);
+      return;
+    }
+    const cycle = p * 7.5 % 1;
+    const wave = Math.sin(cycle * Math.PI * 2);
+    const shedding = smooth(0.23, 0.33, p) * (1 - smooth(0.67, 0.8, p));
+    this.heddleA.position.y = wave * 0.28 * shedding;
+    this.heddleB.position.y = -wave * 0.28 * shedding;
+    this.reedPivot.rotation.x = (0.06 + Math.max(0, Math.sin(cycle * Math.PI * 2 + 1.3)) * 0.23) * smooth(0.36, 0.48, p);
+    this.shuttle.position.x = -2.8 + 5.6 * (0.5 - 0.5 * Math.cos(cycle * Math.PI * 2)) * smooth(0.42, 0.53, p);
+    this.shuttle.position.y = 0.3 + 0.1 * shedding;
+    this.shuttle.rotation.y = wave * 0.05;
+    this.rollers.forEach((r, i) => r.rotation.y = p * 1.9 * (i % 2 ? -1 : 1));
+    this.groups.cloth.scale.z = 0.12 + 0.88 * smooth(0.65, 0.86, p);
+    this.groups.cloth.position.z = 2.3 * (1 - smooth(0.65, 0.86, p));
+    this.warpLines.forEach((l) => l.visible = p < 0.98);
+  }
+  isolate(part) {
+    for (const [name, group] of Object.entries(this.groups)) group.visible = part === "all" || name === part || name === "frame";
+  }
+  dispose() {
+    this.root.traverse((o) => {
+      if (o instanceof Mesh || o instanceof Line) o.geometry.dispose();
+    });
+  }
+};
 
 // src/world/factory.ts
 var mats = [];
@@ -32703,46 +32807,11 @@ function buildFactory() {
     line(warp, [new Vector3(x, -0.15, 4), new Vector3(x, 0.12, 1), new Vector3(x, 0.03, -1), new Vector3(x, -0.15, -4)], i % 7 === 0 ? 14267531 : 11716808, 8e-3);
   }
   for (const x of [-3.7, 3.7]) bar(warp, dark, [x, -0.6, 0], [0.24, 2.2, 9]);
-  const loom = new Group();
-  loom.position.z = -44;
-  root.add(loom);
-  for (const x of [-3.8, 3.8]) {
-    bar(loom, metal, [x, -0.4, 0], [0.32, 3.4, 7]);
-    bar(loom, dark, [x, 1.3, 0], [0.55, 0.25, 7]);
-  }
-  for (const z of [-2.8, 2.8]) {
-    bar(loom, metal, [0, -1.4, z], [7.8, 0.3, 0.4]);
-    bar(loom, metal, [0, 1.15, z], [7.8, 0.18, 0.3]);
-  }
-  const heddleA = new Group(), heddleB = new Group();
-  loom.add(heddleA, heddleB);
-  for (let i = 0; i < 110; i++) {
-    const x = (i - 54.5) * 0.062;
-    const c = i % 2 === 0 ? heddleA : heddleB;
-    line(c, [new Vector3(x, -0.2, 3), new Vector3(x, 0, 0), new Vector3(x, -0.25, -3)], i % 11 === 0 ? 15251852 : 13818315, 8e-3);
-  }
-  const reed = bar(loom, gold, [0, 0.15, -0.5], [7, 0.14, 0.14]);
-  const shuttle = mesh(new CapsuleGeometry(0.16, 0.9, 4, 10), gold, 0, -0.12, -0.2);
-  shuttle.rotation.z = Math.PI / 2;
-  loom.add(shuttle);
-  for (let j = 0; j < 22; j++) {
-    const z = -2.7 + j * 0.24;
-    line(loom, [new Vector3(-3.4, -0.3, z), new Vector3(3.4, -0.3, z)], j % 5 === 0 ? 15120775 : 12110015, 0.015);
-  }
-  animations.push((t, _p, snap) => {
-    if (snap && snap.mechanics) {
-      const m = snap.mechanics;
-      const fo = m.frameOffsets;
-      heddleA.position.y = (fo[0] ?? 0) * 0.64;
-      heddleB.position.y = (fo[1] ?? 0) * 0.64;
-      reed.position.z = -0.5 + m.reed * 0.4;
-      shuttle.position.x = snap.transfer.tip.x;
-    } else {
-      heddleA.position.y = Math.sin(t * 3) * 0.2;
-      heddleB.position.y = -Math.sin(t * 3) * 0.2;
-      reed.position.z = -0.5 + Math.sin(t * 3) * 0.4;
-      shuttle.position.x = Math.sin(t * 2) * 3;
-    }
+  const loomFinal = new LoomFinal();
+  loomFinal.root.position.set(0, -1.05, -44);
+  root.add(loomFinal.root);
+  animations.push((_t, p, snap) => {
+    loomFinal.pose(p, snap ?? null);
   });
   const finishing = new Group();
   finishing.position.z = -59;
@@ -32824,30 +32893,6 @@ function classifyFault(e) {
 function validateRecovery(plan, snapshotValid, repairCallbackSucceeded) {
   const verified = snapshotValid && repairCallbackSucceeded;
   return { planId: plan.id, ok: verified, verified, reason: verified ? "Post-repair invariants passed" : "Repair verification failed; machine remains locked", cycle: Number(plan.id.split("@")[1]) };
-}
-
-// src/loom12/kinematics.ts
-var clamp2 = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
-var smooth = (a, b, x) => {
-  const t = clamp2((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
-};
-function lift(end, pick, weave) {
-  if (weave === "plain") return (end + pick) % 2 === 0;
-  if (weave === "basket") return (Math.floor(end / 2) + Math.floor(pick / 2)) % 2 === 0;
-  return ((end - pick) % 4 + 4) % 4 < 2;
-}
-function poseAt(t, c) {
-  const pick = Math.max(0, Math.floor(t)), phase = t - pick;
-  const shed = smooth(0, 0.19, phase) * (1 - smooth(0.69, 0.85, phase));
-  const beat = smooth(0.77, 0.9, phase) * (1 - smooth(0.94, 1, phase));
-  const leftX = -2.45 + 2.45 * smooth(0.18, 0.43, phase) - 2.45 * smooth(0.53, 0.72, phase);
-  const rightX = 2.45 - 2.45 * smooth(0.38, 0.46, phase) + 2.45 * smooth(0.54, 0.74, phase);
-  const transfer = phase >= 0.46 && phase < 0.54;
-  const feed = phase < 0.46 ? (leftX + 2.45) / 4.9 : phase < 0.54 ? 0.5 : (rightX + 2.45) / 4.9;
-  const clothLengthM = t / (c.picksPerCm * 100);
-  const beamRadius = 0.48, takeupRadius = 0.34;
-  return { pick, phase, shed, beat, leftX, rightX, transfer, feed, clothLengthM, beamAngle: -clothLengthM / beamRadius, takeupAngle: clothLengthM / takeupRadius };
 }
 
 // src/loom12/engineering.ts
