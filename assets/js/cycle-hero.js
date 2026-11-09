@@ -32808,8 +32808,9 @@ var WorldEngine = class {
   constructor(canvas, onStage) {
     this.canvas = canvas;
     this.onStage = onStage;
-    this.renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    const mobile = matchMedia("(max-width:767px)").matches || matchMedia("(pointer:coarse)").matches;
+    this.renderer = new WebGLRenderer({ canvas, antialias: !mobile, alpha: false, powerPreference: mobile ? "low-power" : "high-performance" });
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1 : 1.75));
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.scene.background = new Color(528147);
@@ -32827,6 +32828,10 @@ var WorldEngine = class {
     this.resizeObserver.observe(canvas);
     this.resize();
     window.addEventListener("pointermove", this.handlePointer, { passive: true });
+    this.observer = new IntersectionObserver((es) => {
+      this.visible = es[0]?.isIntersecting ?? true;
+    }, { threshold: 0 });
+    this.observer.observe(canvas);
     this.loadMachines();
     this.tick();
   }
@@ -32845,6 +32850,8 @@ var WorldEngine = class {
   resizeObserver;
   loader = new GLTFLoader();
   machines = /* @__PURE__ */ new Map();
+  visible = true;
+  observer;
   async loadMachines() {
     const specs = [
       { file: "spinner.glb", stage: 1, z: -12, scale: 1 },
@@ -32903,6 +32910,9 @@ var WorldEngine = class {
     this.frame = requestAnimationFrame(this.tick);
     const delta = Math.min(this.clock.getDelta(), 0.05);
     const t = this.clock.elapsedTime;
+    if (document.hidden || !this.visible) {
+      return;
+    }
     this.progress += (this.target - this.progress) * (1 - Math.exp(-delta * 7));
     const f = this.progress * (waypoints.length - 1);
     const index = Math.min(Math.floor(f), waypoints.length - 2);
@@ -32923,6 +32933,7 @@ var WorldEngine = class {
     cancelAnimationFrame(this.frame);
     window.removeEventListener("pointermove", this.handlePointer);
     this.resizeObserver.disconnect();
+    this.observer?.disconnect();
     this.factory.dispose();
     this.renderer.dispose();
   }
