@@ -33242,7 +33242,7 @@ var WorldEngine = class {
     ];
     for (const s of specs) {
       try {
-        const candidates = [`cycle/models/${s.file}`, `models/${s.file}`, `/PratoHub/cycle/models/${s.file}`, `${import.meta.env.BASE_URL || "./"}models/${s.file}`];
+        const candidates = [`cycle/models/${s.file}`, `models/${s.file}`, `/PratoHub/cycle/models/${s.file}`, `${import.meta.env?.BASE_URL || "./"}models/${s.file}`];
         let gltf = null;
         for (const c of candidates) {
           try {
