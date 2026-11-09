@@ -33188,8 +33188,26 @@ var WorldEngine = class {
     this.resizeObserver.observe(canvas);
     this.resize();
     window.addEventListener("pointermove", this.handlePointer, { passive: true });
+    canvas.addEventListener("webglcontextlost", (e) => {
+      e.preventDefault();
+      try {
+        this.orch.handleRuntimeFailure("contextlost");
+      } catch {
+      }
+      ;
+      this.visible = false;
+    });
+    canvas.addEventListener("webglcontextrestored", () => {
+      this.visible = true;
+      try {
+        this.orch.dispatch("RESET");
+        this.orch.dispatch("PLAY");
+      } catch {
+      }
+    });
     this.observer = new IntersectionObserver((es) => {
       this.visible = es[0]?.isIntersecting ?? true;
+      if (this.visible) this.tickOnce();
     }, { threshold: 0 });
     this.observer.observe(canvas);
     this.loadMachines();
@@ -33267,6 +33285,10 @@ var WorldEngine = class {
   }
   setProgress(value) {
     this.target = clamp3(value);
+  }
+  tickOnce() {
+    if (this.disposed) return;
+    this.renderer.render(this.scene, this.camera);
   }
   tick = () => {
     if (this.disposed) return;
