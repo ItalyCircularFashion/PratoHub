@@ -32950,15 +32950,53 @@ function initCycleHero(canvas) {
     const num = document.getElementById("cycle-num");
     if (num) num.textContent = String(i + 1).padStart(2, "0");
   });
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const heroEl = document.querySelector(".hero");
-  const onScroll = () => {
-    if (!heroEl) return;
-    const r = heroEl.getBoundingClientRect();
-    const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height)));
-    engine.setProgress(p * 0.85);
+  let manualUntil = 0;
+  const markManual = () => {
+    manualUntil = performance.now() + 2500;
   };
-  addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+  addEventListener("scroll", markManual, { passive: true });
+  let dragging = false, lastX = 0;
+  canvas.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    lastX = e.clientX;
+    canvas.setPointerCapture(e.pointerId);
+    markManual();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    if (Math.abs(dx) > 2) {
+      manualUntil = performance.now() + 1500;
+    }
+  });
+  canvas.addEventListener("pointerup", () => {
+    dragging = false;
+    markManual();
+  });
+  const readScroll = () => {
+    if (!heroEl) return 0;
+    const r = heroEl.getBoundingClientRect();
+    return Math.min(1, Math.max(0, -r.top / Math.max(1, r.height))) * 0.85;
+  };
+  const tick = () => {
+    if (reduced || dragging) return;
+    const now = performance.now();
+    if (now < manualUntil) {
+      engine.setProgress(readScroll());
+      return;
+    }
+    if (document.hidden) return;
+    const t = now / 1e3;
+    const auto = 0.425 + 0.425 * Math.sin(t * 0.12);
+    const sp = readScroll();
+    const atTop = heroEl ? heroEl.getBoundingClientRect().top >= -10 : true;
+    engine.setProgress(atTop ? auto : sp);
+  };
+  const loop = setInterval(tick, 120);
+  addEventListener("pagehide", () => clearInterval(loop), { once: true });
   return engine;
 }
 if (typeof document !== "undefined") {
